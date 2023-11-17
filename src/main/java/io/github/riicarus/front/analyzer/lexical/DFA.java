@@ -21,6 +21,12 @@ public class DFA {
 
     private final Set<Character> inputCharSet = new HashSet<>();
 
+    private DfaState startState;
+
+    public boolean validString(String s) {
+        return false;
+    }
+
     public void addState(DfaState state) {
         dfaStates.add(state);
     }
@@ -123,6 +129,9 @@ public class DFA {
 
             for (DfaState oldState : stateSet) {
                 stateMap.put(oldState, newState);
+
+                // 如果新的等价集合包含开始状态, 那么将新的状态设置为开始状态.
+                if (oldState.getState() == startState.getState()) minimizedDFA.startState = newState;
             }
 
             minimizedDFA.addState(newState);
@@ -149,6 +158,7 @@ public class DFA {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         dfaStates.forEach(sb::append);
+        sb.append("start: ").append(startState.getState());
 
         return sb.toString();
     }
@@ -198,6 +208,10 @@ public class DFA {
         }
 
         // System.out.println(Q);
+
+        for (DfaState dfaState : dfa.dfaStates) {
+            if (dfaState.getState() == 0) dfa.startState = dfaState;
+        }
 
         return dfa;
     }
