@@ -27,20 +27,29 @@ public class NfaTest {
     }
 
     @Test
-    public void testEpsClosureNFA() {
+    public void testClosureNFA() {
         testUnionNFA();
         System.out.println(NFA.closure(NFA.union(nfaA, nfaB)));
     }
 
     @Test
-    public void testReToNFA() {
-        String expr = "a*(bc|d)";
-        String infix = NFA.toInfix(expr);
-        System.out.println(infix);
-        String suffix = NFA.infixToSuffix(infix);
-        System.out.println(suffix);
-
-        System.out.println(NFA.reToNFA(expr));
+    public void testEpsClosureNFA() {
+        NFA nfa = NFA.reToNFA("a(b|c)*");
+        System.out.println(nfa);
+        System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), NfaEdge.EPS_TRANS_VALUE));
+        System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), 'b'));
+        System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), 'c'));
     }
+
+//    @Test
+//    public void testReToNFA() {
+//        String expr = "a*(bc|d)";
+//        String infix = NFA.toInfix(expr);
+//        System.out.println(infix);
+//        String suffix = NFA.infixToSuffix(infix);
+//        System.out.println(suffix);
+//
+//        System.out.println(NFA.reToNFA(expr));
+//    }
 
 }

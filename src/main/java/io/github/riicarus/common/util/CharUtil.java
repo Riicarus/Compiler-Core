@@ -1,5 +1,9 @@
 package io.github.riicarus.common.util;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * 字符工具类, 判断输入字符的类型.
  *
@@ -8,6 +12,18 @@ package io.github.riicarus.common.util;
  * @since 1.0.0
  */
 public class CharUtil {
+
+    private static final Set<Character> DEFAULT_CHAR_SET = new HashSet<>();
+
+    static {
+        for (int i = 0; i <= 127; i++) {
+            DEFAULT_CHAR_SET.add((char) i);
+        }
+    }
+
+    public static Set<Character> getDefaultASCIICharSet() {
+        return Collections.unmodifiableSet(DEFAULT_CHAR_SET);
+    }
 
     public static boolean isBlank(char c) {
         return c == ' ';

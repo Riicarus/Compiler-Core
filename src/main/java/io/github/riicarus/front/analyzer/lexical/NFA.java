@@ -2,12 +2,17 @@ package io.github.riicarus.front.analyzer.lexical;
 
 import io.github.riicarus.common.util.CharUtil;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * 非确定有限状态自动机.
+ *
+ * <p>基于 Thompson 算法, 根据正则表达式生成 NFA, 过程为:</p>
+ * <li>根绝正则表达式生成其中缀表达式</li>
+ * <li>根绝中缀表达式生成后缀表达式</li>
+ * <li>根绝后缀表达式生成 NFA</li>
+ *
+ * <p>仅支持连接, 合并和闭包操作.</p>
  *
  * @author Riicarus
  * @create 2023-11-16 18:09
@@ -38,6 +43,74 @@ public class NFA {
         this.stateCount = stateCount;
     }
 
+    /**
+     * 获取从 state 开始的 eps-闭包.
+     *
+     * @param state 开始状态
+     * @return 从 state 开始的 esp-闭包集合(set)
+     */
+    public Set<Integer> epsClosureOfState(int state) {
+        Set<Integer> epsClosure = new HashSet<>();
+
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(state);
+        while (!queue.isEmpty()) {
+            int s = queue.poll();
+            epsClosure.add(s);
+
+            for (NfaEdge e : nfaEdges) {
+                // 从 State s 开始, 通过 eps 转换的边
+                if (e.getFromState() == s && e.getTransValue() == NfaEdge.EPS_TRANS_VALUE) {
+                    int u = e.getToState();
+                    if (!epsClosure.contains(u)) {
+                        epsClosure.add(u);
+                        queue.add(u);
+                    }
+                }
+            }
+        }
+
+        return epsClosure;
+    }
+
+    /**
+     * 获取从 beginSet 中任意一个状态, 能够通过 trans 转换到的目标状态集合.
+     *
+     * @param beginSet 开始状态集合
+     * @param trans    转换字符
+     * @return 目标状态集合
+     */
+    public Set<Integer> move(Set<Integer> beginSet, char trans) {
+        Set<Integer> end = new HashSet<>();
+
+        for (Integer begin : beginSet) {
+            for (NfaEdge edge : nfaEdges) {
+                if (begin == edge.getFromState() && trans == edge.getTransValue()) {
+                    end.add(edge.getToState());
+                }
+            }
+        }
+
+        return end;
+    }
+
+    /**
+     * 获取从 beginSet 中任意状态, 能够通过 trans 转换到的目标状态集合的 eps-闭包集合.
+     *
+     * @param beginSet 开始状态集合
+     * @param trans 转换字符
+     * @return 目标状态集合的 eps-闭包集合
+     */
+    public Set<Integer> epsClosureMove(Set<Integer> beginSet, char trans) {
+        Set<Integer> epsClosureEndSet = new HashSet<>();
+
+        for (Integer state : move(beginSet, trans)) {
+            epsClosureEndSet.addAll(epsClosureOfState(state));
+        }
+
+        return epsClosureEndSet;
+    }
+
     public List<NfaEdge> getEdges() {
         return nfaEdges;
     }
@@ -55,6 +128,13 @@ public class NFA {
         return sb.toString();
     }
 
+    /**
+     * 取两个 NFA 的使用 eps 连接的并集, 即 "a|b", 注意顺序.
+     *
+     * @param a NFA
+     * @param b NFA
+     * @return 两个 NFA 的并集
+     */
     public static NFA union(NFA a, NFA b) {
         if (a == null && b == null) return new NFA();
         else if (a != null && b == null) return a;
@@ -92,6 +172,13 @@ public class NFA {
         return new NFA(edgesC, countA + countB + 2);
     }
 
+    /**
+     * 取两个 NFA 的使用 eps 连接的连接, 即: "ab", 注意顺序.
+     *
+     * @param a NFA
+     * @param b NFA
+     * @return 两个 NFA 的连接
+     */
     public static NFA concat(NFA a, NFA b) {
         if (a == null && b == null) return new NFA();
         else if (a != null && b == null) return a;
@@ -120,6 +207,12 @@ public class NFA {
         return new NFA(edgesC, countA + countB);
     }
 
+    /**
+     * 取 NFA 的闭包.
+     *
+     * @param a NFA
+     * @return NFA 的闭包
+     */
     public static NFA closure(NFA a) {
         if (a == null) return new NFA();
 
@@ -148,11 +241,35 @@ public class NFA {
         return new NFA(edgesB, countA + 2);
     }
 
-    public static NFA reToNFA(String expr) {
-        return reSuffixToNFA(infixToSuffix(toInfix(expr)));
+    /**
+     * 将正则表达式转换为 NFA.
+     *
+     * @param expr 正则表达式.
+     * @param inputCharSet 输入中可使用的字符集合.
+     * @return NFA
+     */
+    public static NFA reToNFA(String expr, Set<Character> inputCharSet) {
+        return reSuffixToNFA(infixToSuffix(reToInfix(expr)), inputCharSet);
     }
 
-    public static NFA reSuffixToNFA(String reSuffix) {
+    /**
+     * 将正则表达式转换为 NFA.
+     *
+     * @param expr 正则表达式.
+     * @return NFA
+     */
+    public static NFA reToNFA(String expr) {
+        return reSuffixToNFA(infixToSuffix(reToInfix(expr)), null);
+    }
+
+    /**
+     * 将正则表达式的后缀表达式转换为 NFA.
+     *
+     * @param reSuffix 正则表达式的后缀表达式.
+     * @param inputCharSet 输入中可使用的字符集合.
+     * @return NFA
+     */
+    private static NFA reSuffixToNFA(String reSuffix, Set<Character> inputCharSet) {
         Stack<NFA> nfaStack = new Stack<>();
 
         int ID = -1;
@@ -160,10 +277,7 @@ public class NFA {
         for (int i = 0; i < reSuffix.length(); i++) {
             char tmp = reSuffix.charAt(i);
 
-            // if current char is letter, create a new edge
-            if (tmp >= 'A' && tmp <= 'z') {
-                nfaStack.push(new NFA(tmp));
-            } else if (tmp == '|') {
+            if (tmp == '|') {
                 NFA b = nfaStack.pop();
                 NFA a = nfaStack.pop();
                 nfaStack.push(NFA.union(a, b));
@@ -171,41 +285,71 @@ public class NFA {
                 NFA b = nfaStack.pop();
                 NFA a = nfaStack.pop();
                 nfaStack.push(NFA.concat(a, b));
-            } else if (tmp == '*')
+            } else if (tmp == '*') {
                 nfaStack.push(NFA.closure(nfaStack.pop()));
-            else throw new IllegalStateException("reSuffixToNFA(): Wrong op.");
+            } else {    // 如果 tmp 不是功能符号, 就生成一条边.
+                // 如果所有字符都可以使用
+                if (inputCharSet == null || inputCharSet.isEmpty()) {
+                    nfaStack.push(new NFA(tmp));
+                } else {
+                    // 如果只有一些字符能使用, 必须先判断是否合法.
+                    if (inputCharSet.contains(tmp)) {
+                        nfaStack.push(new NFA(tmp));
+                    } else {
+                        throw new IllegalStateException("reSuffixToNFA(): Forbidden character.");
+                    }
+                }
+            }
         }
 
         return nfaStack.pop();
     }
 
-    public static String toInfix(String expr) {
+    /**
+     * 将正则表达式转换为其中缀表达式.
+     *
+     * @param expr 正则表达式.
+     * @return 正则表达式的中缀表达式
+     */
+    private static String reToInfix(String expr) {
         StringBuilder infixBuilder = new StringBuilder();
         for (int i = 0; i < expr.length(); i++) {
             char tmp = expr.charAt(i);
             char next;
 
-            if (i == expr.length() - 1) next = '\0';
-            else next = expr.charAt(i + 1);
+            if (i == expr.length() - 1)
+                next = '\0';
+            else
+                next = expr.charAt(i + 1);
 
             // 如果表示的是连接操作, 如: "ab", 就转换成 "a.b"; 否则直接拼接字符.
-            if (tmp != '(' && tmp != '.' && tmp != '|' && next != ')' && next != '*' && next != '|' && next != '.' && next != '\0') {
+            if (tmp != '(' && tmp != '.' && tmp != '|' && next != ')' &&
+                    next != '*' && next != '|' && next != '.' && next != '\0') {
                 infixBuilder.append(tmp).append(".");
-            } else infixBuilder.append(tmp);
+            } else {
+                infixBuilder.append(tmp);
+            }
         }
 
         return infixBuilder.toString();
     }
 
-    public static String infixToSuffix(String infix) {
+    /**
+     * 将正则表达式的中缀表达式转换为后缀表达式.
+     *
+     * @param infix 正则表达式的中缀表达式.
+     * @return 正则表达式的后缀表达式.
+     */
+    private static String infixToSuffix(String infix) {
         StringBuilder suffixBuilder = new StringBuilder();
         Stack<Character> op = new Stack<>();
 
         for (int i = 0; i < infix.length(); i++) {
             char tmp = infix.charAt(i);
 
-            if (tmp == '(') op.push(tmp);
-            else if (tmp == ')') {
+            if (tmp == '(') {
+                op.push(tmp);
+            } else if (tmp == ')') {
                 while (op.peek() != '(') {
                     suffixBuilder.append(op.pop());
                 }
@@ -215,7 +359,9 @@ public class NFA {
                     suffixBuilder.append(op.pop());
                 }
                 op.push(tmp);
-            } else suffixBuilder.append(tmp);
+            } else {
+                suffixBuilder.append(tmp);
+            }
         }
 
         while (!op.isEmpty()) suffixBuilder.append(op.pop());

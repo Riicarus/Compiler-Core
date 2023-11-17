@@ -18,7 +18,8 @@ public class NfaEdge {
     // 边的转换值
     private final char transValue;
 
-    private static final char EPS_TRANS_VALUE = 'e';
+    // 使用一个不是 ASCII 的 char 进行标志
+    public static final char EPS_TRANS_VALUE = (char) 128;
 
     /**
      * 创建一个边.
