@@ -24,11 +24,14 @@ public class NFA {
 
     private final int stateCount;
 
+    private final Set<Integer> terminateStateSet = new HashSet<>();
+
     public NFA() {
         stateCount = 2;
         nfaEdges = new LinkedList<>();
         NfaEdge e = new NfaEdge(0, 1);
         nfaEdges.add(e);
+        terminateStateSet.add(1);
     }
 
     public NFA(char c) {
@@ -36,6 +39,7 @@ public class NFA {
         nfaEdges = new LinkedList<>();
         NfaEdge e = new NfaEdge(0, c, 1);
         nfaEdges.add(e);
+        terminateStateSet.add(1);
     }
 
     public NFA(List<NfaEdge> nfaEdges, int stateCount) {
@@ -98,7 +102,7 @@ public class NFA {
      * 获取从 beginSet 中任意状态, 能够通过 trans 转换到的目标状态集合的 eps-闭包集合.
      *
      * @param beginSet 开始状态集合
-     * @param trans 转换字符
+     * @param trans    转换字符
      * @return 目标状态集合的 eps-闭包集合
      */
     public Set<Integer> epsClosureMove(Set<Integer> beginSet, char trans) {
@@ -119,13 +123,48 @@ public class NFA {
         return stateCount;
     }
 
+    public Set<Integer> getTerminateStateSet() {
+        return Collections.unmodifiableSet(terminateStateSet);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Start state: ").append(0);
-        sb.append("\n").append("End state: ").append(stateCount);
+        sb.append("\n").append("End state: ").append(stateCount - 1);
         nfaEdges.forEach(x -> sb.append("\n").append(x));
+        sb.append("\n").append("terminate: ").append(terminateStateSet);
         return sb.toString();
+    }
+
+    /**
+     * 将多个 NFA 合并为一个.
+     *
+     * @param collection NFA 集合
+     * @return 合并后的 NFA
+     */
+    public static NFA merge(Collection<NFA> collection) {
+        List<NfaEdge> edges = new LinkedList<>();
+        Set<Integer> terminatedStateSet = new HashSet<>();
+
+        int offset = 1;
+        for (NFA nfa : collection) {
+            edges.add(new NfaEdge(0, offset));
+            for (NfaEdge nfaEdge : nfa.nfaEdges) {
+                NfaEdge e = new NfaEdge(nfaEdge.getFromState() + offset, nfaEdge.getTransValue(), nfaEdge.getToState() + offset);
+                edges.add(e);
+            }
+            for (Integer t : nfa.terminateStateSet) {
+                terminatedStateSet.add(t + offset);
+            }
+
+            offset += nfa.getStateCount();
+        }
+
+        NFA merged = new NFA(edges, offset);
+        merged.terminateStateSet.addAll(terminatedStateSet);
+
+        return merged;
     }
 
     /**
@@ -169,7 +208,10 @@ public class NFA {
         NfaEdge BToEnd = new NfaEdge(countA + countB, countA + countB + 1);
         edgesC.add(BToEnd);
 
-        return new NFA(edgesC, countA + countB + 2);
+        NFA nfa = new NFA(edgesC, countA + countB + 2);
+        nfa.terminateStateSet.add(nfa.stateCount - 1);
+
+        return nfa;
     }
 
     /**
@@ -204,7 +246,10 @@ public class NFA {
             edgesC.add(e);
         }
 
-        return new NFA(edgesC, countA + countB);
+        NFA nfa = new NFA(edgesC, countA + countB);
+        nfa.terminateStateSet.add(nfa.stateCount - 1);
+
+        return nfa;
     }
 
     /**
@@ -238,17 +283,21 @@ public class NFA {
         NfaEdge circle = new NfaEdge(countA, 1);
         edgesB.add(circle);
 
-        return new NFA(edgesB, countA + 2);
+        NFA nfa = new NFA(edgesB, countA + 2);
+        nfa.terminateStateSet.add(nfa.stateCount - 1);
+
+        return nfa;
     }
 
     /**
      * 将正则表达式转换为 NFA.
      *
-     * @param expr 正则表达式.
+     * @param expr         正则表达式.
      * @param inputCharSet 输入中可使用的字符集合.
      * @return NFA
      */
     public static NFA reToNFA(String expr, Set<Character> inputCharSet) {
+        if (!isRegexLegal(expr, inputCharSet)) throw new IllegalArgumentException("RegExp is not legal.");
         return reSuffixToNFA(infixToSuffix(reToInfix(expr)), inputCharSet);
     }
 
@@ -265,7 +314,7 @@ public class NFA {
     /**
      * 将正则表达式的后缀表达式转换为 NFA.
      *
-     * @param reSuffix 正则表达式的后缀表达式.
+     * @param reSuffix     正则表达式的后缀表达式.
      * @param inputCharSet 输入中可使用的字符集合.
      * @return NFA
      */
@@ -367,5 +416,57 @@ public class NFA {
         while (!op.isEmpty()) suffixBuilder.append(op.pop());
 
         return suffixBuilder.toString();
+    }
+
+    /**
+     * 检查正则表达式是否合法.
+     *
+     * @param expr         正则表达式
+     * @param inputCharSet 允许输入的字符集合
+     * @return 正则表达式是否合法
+     */
+    private static boolean isRegexLegal(String expr, Set<Character> inputCharSet) {
+        Stack<Character> bracktStack = new Stack<>();
+
+        if (inputCharSet == null || inputCharSet.isEmpty())
+            inputCharSet = CharUtil.getDefaultASCIICharSet();
+
+        for (int i = 0; i < expr.length(); i++) {
+            char c = expr.charAt(i);
+            if (inputCharSet.contains(c)) continue;
+            if (c == '|' || c == '*' || c == '.') continue;
+
+            if (c == '(') bracktStack.push(c);
+            else if (c == ')')
+                if (bracktStack.isEmpty()) return false;
+                else bracktStack.pop();
+            else return false;
+        }
+
+        if (!bracktStack.isEmpty()) return false;
+
+        for (int i = 0; i < expr.length(); i++) {
+            char c = expr.charAt(i);
+            char next;
+            if (c == '|') {
+                if (i == 0 || i == expr.length() - 1) {
+                    return false;
+                } else {
+                    next = expr.charAt(i + 1);
+                    if (next == '|' || next == '*' || next == '.' || next == ')') return false;
+                }
+            } else if (c == '.') {
+                if (i == 0 || i == expr.length() - 1) return false;
+                else {
+                    next = expr.charAt(i + 1);
+                    if (next == '|' || next == '*' || next == '.' || next == ')') return false;
+                }
+            } else if (c == '*') {
+                if (i == 0) return false;
+                else if (i != expr.length() - 1 && expr.charAt(i + 1) == '*') return false;
+            }
+        }
+
+        return true;
     }
 }
