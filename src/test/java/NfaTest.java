@@ -1,5 +1,5 @@
-import io.github.riicarus.front.analyzer.lexer.NfaEdge;
-import io.github.riicarus.front.analyzer.lexer.NFA;
+import io.github.riicarus.front.lexer.NfaEdge;
+import io.github.riicarus.front.lexer.NFA;
 import org.junit.Test;
 
 import java.util.List;

@@ -1,8 +1,8 @@
 package io.github.riicarus.common.data;
 
 import io.github.riicarus.common.util.CharUtil;
-import io.github.riicarus.front.analyzer.lexer.DFA;
-import io.github.riicarus.front.analyzer.lexer.NFA;
+import io.github.riicarus.front.lexer.DFA;
+import io.github.riicarus.front.lexer.NFA;
 
 /**
  * 单词符号.

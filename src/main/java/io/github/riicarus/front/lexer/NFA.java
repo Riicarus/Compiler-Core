@@ -1,4 +1,4 @@
-package io.github.riicarus.front.analyzer.lexer;
+package io.github.riicarus.front.lexer;
 
 import io.github.riicarus.common.util.CharUtil;
 
