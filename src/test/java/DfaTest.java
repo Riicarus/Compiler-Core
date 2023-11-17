@@ -15,7 +15,7 @@ public class DfaTest {
 
     @Test
     public void testNfaToDfa() {
-        NFA nfa = NFA.merge(List.of(NFA.reToNFA("a(b|c)*"), NFA.reToNFA("ab")));
+        NFA nfa = NFA.merge(List.of(NFA.reToNFA("a[b|c]^"), NFA.reToNFA("ab")));
         System.out.println(nfa);
         DFA dfa = DFA.nfaToDfa(nfa, null);
         System.out.println(dfa);
@@ -23,14 +23,14 @@ public class DfaTest {
 
     @Test
     public void testNumberDfa() {
-        String regex = "(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*";
+        String regex = "[0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9]^";
         NFA nfa = NFA.reToNFA(regex);
         System.out.println(DFA.nfaToDfa(nfa, null));
     }
 
     @Test
     public void testMinimizeDfa() {
-        DFA dfa = DFA.nfaToDfa(NFA.merge(List.of(NFA.reToNFA("a(b|c)*"), NFA.reToNFA("ab"))), null);
+        DFA dfa = DFA.nfaToDfa(NFA.merge(List.of(NFA.reToNFA("a[b|c]^"), NFA.reToNFA("ab"))), null);
         System.out.println(dfa);
         DFA miniminzedDfa = dfa.minimize();
         System.out.println(miniminzedDfa);
@@ -38,21 +38,21 @@ public class DfaTest {
 
     @Test
     public void testMinimizeComplexDfa() {
-        String regex = "(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*";
+        String regex = "[0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9]^";
         NFA nfa = NFA.reToNFA(regex);
         System.out.println(DFA.nfaToDfa(nfa, null).minimize());
     }
 
     @Test
     public void testValidateString() {
-        String regex = "(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*";
+        String regex = "[0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9]^";
         NFA nfa = NFA.reToNFA(regex);
         DFA numberDfa = DFA.nfaToDfa(nfa, null).minimize();
         System.out.println(numberDfa.validateString("123c4"));
 
         Token target = null;
         for (LexicalSymbol symbol : LexicalSymbol.values()) {
-            final Token token = symbol.validate("read123(123)");
+            final Token token = symbol.validate("*(123)");
             if (target == null) target = token;
             else if (target.getLen() < token.getLen()) target = token;
         }

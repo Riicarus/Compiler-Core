@@ -326,15 +326,15 @@ public class NFA {
         for (int i = 0; i < reSuffix.length(); i++) {
             char tmp = reSuffix.charAt(i);
 
-            if (tmp == '|') {
+            if (tmp == CharUtil.UNION) {
                 NFA b = nfaStack.pop();
                 NFA a = nfaStack.pop();
                 nfaStack.push(NFA.union(a, b));
-            } else if (tmp == '.') {
+            } else if (tmp == CharUtil.CONCAT) {
                 NFA b = nfaStack.pop();
                 NFA a = nfaStack.pop();
                 nfaStack.push(NFA.concat(a, b));
-            } else if (tmp == '*') {
+            } else if (tmp == CharUtil.CLOSURE) {
                 nfaStack.push(NFA.closure(nfaStack.pop()));
             } else {    // 如果 tmp 不是功能符号, 就生成一条边.
                 // 如果所有字符都可以使用
@@ -372,9 +372,9 @@ public class NFA {
                 next = expr.charAt(i + 1);
 
             // 如果表示的是连接操作, 如: "ab", 就转换成 "a.b"; 否则直接拼接字符.
-            if (tmp != '(' && tmp != '.' && tmp != '|' && next != ')' &&
-                    next != '*' && next != '|' && next != '.' && next != '\0') {
-                infixBuilder.append(tmp).append(".");
+            if (tmp != CharUtil.L_BRACKET && tmp != CharUtil.CONCAT && tmp != CharUtil.UNION && next != CharUtil.R_BRACKET &&
+                    next != CharUtil.CLOSURE && next != CharUtil.UNION && next != CharUtil.CONCAT && next != '\0') {
+                infixBuilder.append(tmp).append(CharUtil.CONCAT);
             } else {
                 infixBuilder.append(tmp);
             }
@@ -396,15 +396,15 @@ public class NFA {
         for (int i = 0; i < infix.length(); i++) {
             char tmp = infix.charAt(i);
 
-            if (tmp == '(') {
+            if (tmp == CharUtil.L_BRACKET) {
                 op.push(tmp);
-            } else if (tmp == ')') {
-                while (op.peek() != '(') {
+            } else if (tmp == CharUtil.R_BRACKET) {
+                while (op.peek() != CharUtil.L_BRACKET) {
                     suffixBuilder.append(op.pop());
                 }
                 op.pop();
-            } else if (tmp == '*' || tmp == '.' || tmp == '|') {
-                while (!op.isEmpty() && op.peek() != '(' && CharUtil.precedence(tmp) <= CharUtil.precedence(op.peek())) {
+            } else if (tmp == CharUtil.CLOSURE || tmp == CharUtil.CONCAT || tmp == CharUtil.UNION) {
+                while (!op.isEmpty() && op.peek() != CharUtil.L_BRACKET && CharUtil.precedence(tmp) <= CharUtil.precedence(op.peek())) {
                     suffixBuilder.append(op.pop());
                 }
                 op.push(tmp);
@@ -434,10 +434,10 @@ public class NFA {
         for (int i = 0; i < expr.length(); i++) {
             char c = expr.charAt(i);
             if (inputCharSet.contains(c)) continue;
-            if (c == '|' || c == '*' || c == '.') continue;
+            if (c == CharUtil.UNION || c == CharUtil.CLOSURE || c == CharUtil.CONCAT) continue;
 
-            if (c == '(') bracktStack.push(c);
-            else if (c == ')')
+            if (c == CharUtil.L_BRACKET) bracktStack.push(c);
+            else if (c == CharUtil.R_BRACKET)
                 if (bracktStack.isEmpty()) return false;
                 else bracktStack.pop();
             else return false;
@@ -448,22 +448,22 @@ public class NFA {
         for (int i = 0; i < expr.length(); i++) {
             char c = expr.charAt(i);
             char next;
-            if (c == '|') {
+            if (c == CharUtil.UNION) {
                 if (i == 0 || i == expr.length() - 1) {
                     return false;
                 } else {
                     next = expr.charAt(i + 1);
-                    if (next == '|' || next == '*' || next == '.' || next == ')') return false;
+                    if (next == CharUtil.UNION || next == CharUtil.CLOSURE || next == CharUtil.CONCAT || next == CharUtil.R_BRACKET) return false;
                 }
-            } else if (c == '.') {
+            } else if (c == CharUtil.CONCAT) {
                 if (i == 0 || i == expr.length() - 1) return false;
                 else {
                     next = expr.charAt(i + 1);
-                    if (next == '|' || next == '*' || next == '.' || next == ')') return false;
+                    if (next == CharUtil.UNION || next == CharUtil.CLOSURE || next == CharUtil.CONCAT || next == CharUtil.R_BRACKET) return false;
                 }
-            } else if (c == '*') {
+            } else if (c == CharUtil.CLOSURE) {
                 if (i == 0) return false;
-                else if (i != expr.length() - 1 && expr.charAt(i + 1) == '*') return false;
+                else if (i != expr.length() - 1 && expr.charAt(i + 1) == CharUtil.CLOSURE) return false;
             }
         }
 

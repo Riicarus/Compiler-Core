@@ -34,7 +34,7 @@ public class NfaTest {
 
     @Test
     public void testEpsClosureNFA() {
-        NFA nfa = NFA.reToNFA("a(b|c)*");
+        NFA nfa = NFA.reToNFA("a[b|c]^");
         System.out.println(nfa);
         System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), NfaEdge.EPS_TRANS_VALUE));
         System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), 'b'));
@@ -43,14 +43,14 @@ public class NfaTest {
 
     @Test
     public void testReToNFA() {
-        String expr = "a(b|c)*";
+        String expr = "a[b|c]^";
 //        String expr = "cd";
         System.out.println(NFA.reToNFA(expr));
     }
 
     @Test
     public void testMergeNFA() {
-        System.out.println(NFA.merge(List.of(NFA.reToNFA("a(b|c)*"), NFA.reToNFA("abc"))));
+        System.out.println(NFA.merge(List.of(NFA.reToNFA("a[b|c]^"), NFA.reToNFA("abc"))));
         System.out.println(NFA.merge(List.of(NFA.reToNFA("a"), NFA.reToNFA("b"), NFA.reToNFA("cd"))));
     }
 

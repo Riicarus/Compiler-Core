@@ -20,16 +20,16 @@ public enum LexicalSymbol {
     IF("if", 4, "if"), THEN("then", 5, "then"), ELSE("else", 6, "else"),
     FUNC("function", 7, "function"),
     READ("read", 8, "read"), WRITE("write", 9, "write"),
-    IDENTIFIER("identifier", 10, "(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z)(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|0|1|2|3|4|5|6|7|8|9)*"),
-    CONST("constant", 11, "(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*"),
+    IDENTIFIER("identifier", 10, "[a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z][a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|0|1|2|3|4|5|6|7|8|9]^"),
+    CONST("constant", 11, "[0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9]^"),
     EQ("=", 12, "="), NE("<>", 13, "<>"),
     LE("<=", 14, "<="), LT("<", 15, "<"),
     GE(">=", 16, ">="), GT(">", 17, ">"),
-    MINUS("-", 18, "-"), TIMES("*", 19, "-"),
+    MINUS("-", 18, "-"), TIMES("*", 19, "*"),
     ASSIGN(":=", 20, ":="),
-    L_PAREN("(", 21, "-"), R_PAREN(")", 22, "-"),
+    L_PAREN("(", 21, "("), R_PAREN(")", 22, ")"),
     SEMICOLON(";", 23, ";"),
-    EOL("EOL", 24, "-"), EOF("EOF", 25, "-");
+    EOL("EOL", 24, "\r\n"), EOF("EOF", 25, "\n");
 
     private final String name;
 
