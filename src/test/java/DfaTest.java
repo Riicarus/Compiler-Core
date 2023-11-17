@@ -1,7 +1,7 @@
 import io.github.riicarus.common.data.LexicalSymbol;
 import io.github.riicarus.common.data.Token;
-import io.github.riicarus.front.analyzer.lexical.DFA;
-import io.github.riicarus.front.analyzer.lexical.NFA;
+import io.github.riicarus.front.analyzer.lexer.DFA;
+import io.github.riicarus.front.analyzer.lexer.NFA;
 import org.junit.Test;
 
 import java.util.List;

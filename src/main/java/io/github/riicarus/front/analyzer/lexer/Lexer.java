@@ -1,4 +1,4 @@
-package io.github.riicarus.front.analyzer.lexical;
+package io.github.riicarus.front.analyzer.lexer;
 
 import io.github.riicarus.common.data.LexicalSymbol;
 import io.github.riicarus.common.data.Token;
@@ -15,16 +15,26 @@ import java.util.List;
  * @create 2023-11-7 23:28
  * @since 1.0.0
  */
-public class LexicalAnalyzer {
+public class Lexer {
 
+    // 输入缓冲区
     private char[] buffer;
 
+    // 当前分析到的位置
     private int cur;
 
+    // 当前分析位置对应的行数
     private int line;
 
+    // 当前分析位置在当前行中的位置
     private int lineIdx;
 
+    /**
+     * 分析输入的串, 返回对应的词法符号列表.
+     *
+     * @param input 输入串
+     * @return 词法符号列表
+     */
     public List<Token> analyze(char[] input) {
         List<Token> tokenList = new LinkedList<>();
 
@@ -51,8 +61,12 @@ public class LexicalAnalyzer {
         return tokenList;
     }
 
-    public Token analyzeOne() {
-        // if (cur == forward) moveForward();
+    /**
+     * 向前分析一个串, 使用最长匹配原则.
+     *
+     * @return Token
+     */
+    private Token analyzeOne() {
         char[] s = Arrays.copyOfRange(buffer, cur, buffer.length);
 
         final Token token = LexicalSymbol.validateLongest(String.valueOf(s));

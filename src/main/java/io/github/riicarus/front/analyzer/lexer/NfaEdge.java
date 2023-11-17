@@ -1,4 +1,4 @@
-package io.github.riicarus.front.analyzer.lexical;
+package io.github.riicarus.front.analyzer.lexer;
 
 /**
  * NFA 的一条边.
