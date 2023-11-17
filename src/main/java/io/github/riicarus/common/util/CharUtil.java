@@ -2,6 +2,7 @@ package io.github.riicarus.common.util;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -19,6 +20,24 @@ public class CharUtil {
         for (int i = 0; i <= 127; i++) {
             DEFAULT_CHAR_SET.add((char) i);
         }
+    }
+
+    public static Set<Character> PASCAL_CHAR_SET = new HashSet<>();
+
+    static {
+        for (int i = 48; i <= 62; i++) {
+            PASCAL_CHAR_SET.add((char) i);
+        }
+
+        for (int i = 65; i <= 90; i++) {
+            PASCAL_CHAR_SET.add((char) i);
+        }
+
+        for (int i = 97; i <= 122; i++) {
+            PASCAL_CHAR_SET.add((char) i);
+        }
+
+        PASCAL_CHAR_SET.addAll(List.of('*', '-'));
     }
 
     public static Set<Character> getDefaultASCIICharSet() {

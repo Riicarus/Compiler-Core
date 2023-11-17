@@ -23,8 +23,18 @@ public class DFA {
 
     private DfaState startState;
 
-    public boolean validString(String s) {
-        return false;
+    public String validateString(String s) {
+        DfaState cur = startState;
+        char[] charArray = s.toCharArray();
+        int spot = 0;
+        for (int i = 0; i < charArray.length; i++) {
+            char c = charArray[i];
+            cur = cur.getTransMap().get(c);
+            if (cur == null) break;
+            else if (cur.isTerminate()) spot = i;
+        }
+
+        return s.substring(0, spot + 1);
     }
 
     public void addState(DfaState state) {

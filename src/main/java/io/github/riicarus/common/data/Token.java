@@ -20,13 +20,12 @@ public class Token {
         this.lexeme = lexeme;
     }
 
-    public Token(LexicalSymbol symbol) {
-        this.symbol = symbol;
-        this.lexeme = null;
+    public int getLen() {
+        return lexeme.length();
     }
 
     @Override
     public String toString() {
-        return "<" + symbol.code + ", " + Optional.ofNullable(lexeme).orElse("_") + ">";
+        return "<" + symbol.getCode() + ", " + Optional.ofNullable(lexeme).orElse("_") + ">";
     }
 }

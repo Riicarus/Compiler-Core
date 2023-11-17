@@ -1,3 +1,5 @@
+import io.github.riicarus.common.data.LexicalSymbol;
+import io.github.riicarus.common.data.Token;
 import io.github.riicarus.front.analyzer.lexical.DFA;
 import io.github.riicarus.front.analyzer.lexical.NFA;
 import org.junit.Test;
@@ -39,6 +41,23 @@ public class DfaTest {
         String regex = "(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*";
         NFA nfa = NFA.reToNFA(regex);
         System.out.println(DFA.nfaToDfa(nfa, null).minimize());
+    }
+
+    @Test
+    public void testValidateString() {
+        String regex = "(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*";
+        NFA nfa = NFA.reToNFA(regex);
+        DFA numberDfa = DFA.nfaToDfa(nfa, null).minimize();
+        System.out.println(numberDfa.validateString("123c4"));
+
+        Token target = null;
+        for (LexicalSymbol symbol : LexicalSymbol.values()) {
+            final Token token = symbol.validate("read123(123)");
+            if (target == null) target = token;
+            else if (target.getLen() < token.getLen()) target = token;
+        }
+
+        System.out.println(target);
     }
 
 }
