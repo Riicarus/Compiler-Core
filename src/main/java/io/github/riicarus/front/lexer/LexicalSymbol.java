@@ -1,8 +1,7 @@
-package io.github.riicarus.common.data;
+package io.github.riicarus.front.lexer;
 
+import io.github.riicarus.common.data.Token;
 import io.github.riicarus.common.util.CharUtil;
-import io.github.riicarus.front.lexer.DFA;
-import io.github.riicarus.front.lexer.NFA;
 
 /**
  * 单词符号.
@@ -20,8 +19,8 @@ public enum LexicalSymbol {
     IF("if", 4, "if"), THEN("then", 5, "then"), ELSE("else", 6, "else"),
     FUNC("function", 7, "function"),
     READ("read", 8, "read"), WRITE("write", 9, "write"),
-    IDENTIFIER("identifier", 10, true, "[a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z][a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|0|1|2|3|4|5|6|7|8|9]^"),
-    CONST("constant", 11, true, "[0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9]^"),
+    IDENTIFIER("identifier", 10, true, CharUtil.IDENTIFIER_REGEX),
+    CONST("constant", 11, true, CharUtil.NUMBER_REGEX),
     EQ("=", 12, "="), NE("<>", 13, "<>"),
     LE("<=", 14, "<="), LT("<", 15, "<"),
     GE(">=", 16, ">="), GT(">", 17, ">"),
@@ -95,4 +94,6 @@ public enum LexicalSymbol {
 
         return target;
     }
+
+    public static void avoidLazyLoad() {}
 }

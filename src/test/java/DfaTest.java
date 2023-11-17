@@ -1,4 +1,4 @@
-import io.github.riicarus.common.data.LexicalSymbol;
+import io.github.riicarus.front.lexer.LexicalSymbol;
 import io.github.riicarus.common.data.Token;
 import io.github.riicarus.front.lexer.DFA;
 import io.github.riicarus.front.lexer.NFA;

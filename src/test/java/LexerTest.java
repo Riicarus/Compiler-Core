@@ -11,7 +11,9 @@ public class LexerTest {
     @Test
     public void testAnalyze() {
         Lexer lexer = new Lexer();
-        System.out.println(lexer.analyze("begin read(123) \r\n abc \n 123 \n end".toCharArray()));
+        long time = System.currentTimeMillis();
+        System.out.println(lexer.analyze("begin F read(123) \r\n abc \n 123 \n end".toCharArray()));
+        System.out.println(System.currentTimeMillis() - time);
     }
 
 }

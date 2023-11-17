@@ -1,6 +1,5 @@
 package io.github.riicarus.front.lexer;
 
-import io.github.riicarus.common.data.LexicalSymbol;
 import io.github.riicarus.common.data.Token;
 
 import java.util.Arrays;
@@ -71,7 +70,7 @@ public class Lexer {
 
         final Token token = LexicalSymbol.validateLongest(String.valueOf(s));
 
-        if (token == null) throw new IllegalStateException("Lexer: Wrong syntax \"" + buffer[cur] + "\", line: " + line + "idx: " + lineIdx);
+        if (token == null) throw new IllegalStateException("Lexer: Wrong syntax \"" + buffer[cur] + "\", line: " + line + ", idx: " + lineIdx);
 
         cur += token.getLen();
         lineIdx += token.getLen();
