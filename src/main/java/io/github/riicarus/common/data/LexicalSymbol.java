@@ -20,8 +20,8 @@ public enum LexicalSymbol {
     IF("if", 4, "if"), THEN("then", 5, "then"), ELSE("else", 6, "else"),
     FUNC("function", 7, "function"),
     READ("read", 8, "read"), WRITE("write", 9, "write"),
-    IDENTIFIER("identifier", 10, "[a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z][a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|0|1|2|3|4|5|6|7|8|9]^"),
-    CONST("constant", 11, "[0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9]^"),
+    IDENTIFIER("identifier", 10, true, "[a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z][a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|0|1|2|3|4|5|6|7|8|9]^"),
+    CONST("constant", 11, true, "[0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9]^"),
     EQ("=", 12, "="), NE("<>", 13, "<>"),
     LE("<=", 14, "<="), LT("<", 15, "<"),
     GE(">=", 16, ">="), GT(">", 17, ">"),
@@ -29,11 +29,14 @@ public enum LexicalSymbol {
     ASSIGN(":=", 20, ":="),
     L_PAREN("(", 21, "("), R_PAREN(")", 22, ")"),
     SEMICOLON(";", 23, ";"),
-    EOL("EOL", 24, "\r\n"), EOF("EOF", 25, "\n");
+    EMPTY_SPACE(" ", 24, "[ ][ ]^"),
+    EOL("EOL", 25, "[\r]^\n"), EOF("EOF", 26, String.valueOf((char) 26));
 
     private final String name;
 
     private final int code;
+
+    private final boolean needPrintVal;
 
     private final DFA dfa;
 
@@ -42,12 +45,24 @@ public enum LexicalSymbol {
     }
 
     public Token validate(String s) {
-        return genToken(dfa.validateString(s));
+        String value = dfa.validateString(s);
+
+        if (value == null || value.length() == 0) return null;
+
+        return genToken(value);
+    }
+
+    LexicalSymbol(String name, int code, boolean needPrintVal, String regex) {
+        this.name = name;
+        this.code = code;
+        this.needPrintVal = needPrintVal;
+        this.dfa = DFA.nfaToDfa(NFA.reToNFA(regex, CharUtil.PASCAL_CHAR_SET), CharUtil.PASCAL_CHAR_SET);
     }
 
     LexicalSymbol(String name, int code, String regex) {
         this.name = name;
         this.code = code;
+        this.needPrintVal = false;
         this.dfa = DFA.nfaToDfa(NFA.reToNFA(regex, CharUtil.PASCAL_CHAR_SET), CharUtil.PASCAL_CHAR_SET);
     }
 
@@ -59,7 +74,25 @@ public enum LexicalSymbol {
         return code;
     }
 
+    public boolean isNeedPrintVal() {
+        return needPrintVal;
+    }
+
     public DFA getDfa() {
         return dfa;
+    }
+
+    public static Token validateLongest(String s) {
+        Token target = null;
+        for (LexicalSymbol symbol : LexicalSymbol.values()) {
+            final Token token = symbol.validate(s);
+
+            if (token == null) continue;
+
+            if (target == null) target = token;
+            else if (target.getLen() < token.getLen()) target = token;
+        }
+
+        return target;
     }
 }

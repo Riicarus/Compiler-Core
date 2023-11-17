@@ -26,7 +26,7 @@ public class DFA {
     public String validateString(String s) {
         DfaState cur = startState;
         char[] charArray = s.toCharArray();
-        int spot = 0;
+        int spot = -1;
         for (int i = 0; i < charArray.length; i++) {
             char c = charArray[i];
             cur = cur.getTransMap().get(c);

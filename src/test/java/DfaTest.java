@@ -52,7 +52,10 @@ public class DfaTest {
 
         Token target = null;
         for (LexicalSymbol symbol : LexicalSymbol.values()) {
-            final Token token = symbol.validate("*(123)");
+            final Token token = symbol.validate("\r\n");
+
+            if (token == null) continue;
+
             if (target == null) target = token;
             else if (target.getLen() < token.getLen()) target = token;
         }

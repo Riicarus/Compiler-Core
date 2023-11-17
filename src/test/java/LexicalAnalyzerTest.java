@@ -1,4 +1,5 @@
-import java.io.IOException;
+import io.github.riicarus.front.analyzer.lexical.LexicalAnalyzer;
+import org.junit.Test;
 
 /**
  * @author Riicarus
@@ -7,8 +8,10 @@ import java.io.IOException;
  */
 public class LexicalAnalyzerTest {
 
-    public static void main(String[] args) throws IOException {
-
+    @Test
+    public void testAnalyze() {
+        LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer();
+        System.out.println(lexicalAnalyzer.analyze("begin read(123) \r\n abc \n 123 \n end".toCharArray()));
     }
 
 }

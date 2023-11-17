@@ -37,7 +37,7 @@ public class CharUtil {
             PASCAL_CHAR_SET.add((char) i);
         }
 
-        PASCAL_CHAR_SET.addAll(List.of('*', '-', '(', ')', '\n', '\r'));
+        PASCAL_CHAR_SET.addAll(List.of('*', '-', '(', ')', '\n', '\r', ' ', (char) 26));
     }
 
     public static Set<Character> getDefaultASCIICharSet() {
