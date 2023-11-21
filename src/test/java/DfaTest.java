@@ -16,7 +16,7 @@ public class DfaTest {
 
     @Test
     public void testNfaToDfa() {
-        NFA nfa = NFA.merge(List.of(RegexParser.reToNFA("a[b|c]^"), RegexParser.reToNFA("ab")));
+        NFA nfa = NFA.merge(List.of(RegexParser.reToNFA("a(b|c)*"), RegexParser.reToNFA("ab")));
         System.out.println(nfa);
         DFA dfa = DFA.nfaToDfa(nfa, null);
         System.out.println(dfa);
@@ -24,14 +24,14 @@ public class DfaTest {
 
     @Test
     public void testNumberDfa() {
-        String regex = "[0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9]^";
+        String regex = "(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*";
         NFA nfa = RegexParser.reToNFA(regex);
         System.out.println(DFA.nfaToDfa(nfa, null));
     }
 
     @Test
     public void testMinimizeDfa() {
-        DFA dfa = DFA.nfaToDfa(NFA.merge(List.of(RegexParser.reToNFA("a[b|c]^"), RegexParser.reToNFA("ab"))), null);
+        DFA dfa = DFA.nfaToDfa(NFA.merge(List.of(RegexParser.reToNFA("a(b|c)*"), RegexParser.reToNFA("ab"))), null);
         System.out.println(dfa);
         DFA miniminzedDfa = dfa.minimize();
         System.out.println(miniminzedDfa);
@@ -39,14 +39,14 @@ public class DfaTest {
 
     @Test
     public void testMinimizeComplexDfa() {
-        String regex = "[0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9]^";
+        String regex = "(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*";
         NFA nfa = RegexParser.reToNFA(regex);
         System.out.println(DFA.nfaToDfa(nfa, null).minimize());
     }
 
     @Test
     public void testValidateString() {
-        String regex = "[0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9]^";
+        String regex = "(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*";
         NFA nfa = RegexParser.reToNFA(regex);
         DFA numberDfa = DFA.nfaToDfa(nfa, null).minimize();
         System.out.println(numberDfa.validateString("123c4"));
