@@ -120,6 +120,13 @@ public class DFA {
         return P;
     }
 
+    /**
+     * 使用 Hopcroft 算法将 DFA 最小化, 去除重复的状态.
+     *
+     * <p>此算法在简单正则表达式的转换上表现一般.</p>
+     *
+     * @return 最小化 DFA
+     */
     public DFA minimize() {
         Set<Set<DfaState>> P = hopcroft();
 
