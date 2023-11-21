@@ -49,6 +49,12 @@ public class CharUtil {
     public static final char CLOSURE = '^';
     public static final char CONCAT = '.';
     public static final char UNION = '|';
+    public static final char L_BRACKET_ESCAPED = (char) 128;
+    public static final char R_BRACKET_ESCAPED = (char) 129;
+    public static final char CLOSURE_ESCAPED = (char) 130;
+    public static final char CONCAT_ESCAPED = (char) 131;
+    public static final char UNION_ESCAPED = (char) 132;
+    public static final char ESCAPE = '\\';
 
     public static final String LETTER_REGEX = "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z";
     public static final String DIGIT_REGEX = "0|1|2|3|4|5|6|7|8|9";

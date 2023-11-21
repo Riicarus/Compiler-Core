@@ -2,6 +2,7 @@ package io.github.riicarus.front.lexer;
 
 import io.github.riicarus.common.data.Token;
 import io.github.riicarus.common.util.CharUtil;
+import io.github.riicarus.common.util.RegexParser;
 
 /**
  * 单词符号.
@@ -55,14 +56,14 @@ public enum LexicalSymbol {
         this.name = name;
         this.code = code;
         this.needPrintVal = needPrintVal;
-        this.dfa = DFA.nfaToDfa(NFA.reToNFA(regex, CharUtil.PASCAL_CHAR_SET), CharUtil.PASCAL_CHAR_SET);
+        this.dfa = DFA.nfaToDfa(RegexParser.reToNFA(regex, CharUtil.PASCAL_CHAR_SET), CharUtil.PASCAL_CHAR_SET);
     }
 
     LexicalSymbol(String name, int code, String regex) {
         this.name = name;
         this.code = code;
         this.needPrintVal = false;
-        this.dfa = DFA.nfaToDfa(NFA.reToNFA(regex, CharUtil.PASCAL_CHAR_SET), CharUtil.PASCAL_CHAR_SET);
+        this.dfa = DFA.nfaToDfa(RegexParser.reToNFA(regex, CharUtil.PASCAL_CHAR_SET), CharUtil.PASCAL_CHAR_SET);
     }
 
     public String getName() {

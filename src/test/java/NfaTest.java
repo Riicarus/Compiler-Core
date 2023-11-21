@@ -1,3 +1,4 @@
+import io.github.riicarus.common.util.RegexParser;
 import io.github.riicarus.front.lexer.NfaEdge;
 import io.github.riicarus.front.lexer.NFA;
 import org.junit.Test;
@@ -45,13 +46,13 @@ public class NfaTest {
     public void testReToNFA() {
         String expr = "a[b|c]^";
 //        String expr = "cd";
-        System.out.println(NFA.reToNFA(expr));
+        System.out.println(RegexParser.reToNFA(expr));
     }
 
     @Test
     public void testMergeNFA() {
-        System.out.println(NFA.merge(List.of(NFA.reToNFA("a[b|c]^"), NFA.reToNFA("abc"))));
-        System.out.println(NFA.merge(List.of(NFA.reToNFA("a"), NFA.reToNFA("b"), NFA.reToNFA("cd"))));
+        System.out.println(NFA.merge(List.of(RegexParser.reToNFA("a[b|c]^"), RegexParser.reToNFA("abc"))));
+        System.out.println(NFA.merge(List.of(RegexParser.reToNFA("a"), RegexParser.reToNFA("b"), RegexParser.reToNFA("cd"))));
     }
 
 }
