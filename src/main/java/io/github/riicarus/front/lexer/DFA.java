@@ -223,7 +223,7 @@ public class DFA {
             if (dfaState.getState() == 0) dfa.startState = dfaState;
         }
 
-        return dfa;
+        return dfa.minimize();
     }
 
     /**

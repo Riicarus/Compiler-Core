@@ -27,7 +27,12 @@ public class Compiler {
     private final Lexer lexer = new Lexer();
 
     public void compile(String dir, String name) {
+        System.out.println("Compiling...");
+        long timestamp = System.currentTimeMillis();
+
         lex(dir, name);
+
+        System.out.println("Compile finished, time used: " + (System.currentTimeMillis() - timestamp) + "ms");
     }
 
     private void lex(String dir, String name) {
@@ -56,6 +61,5 @@ public class Compiler {
             throw new RuntimeException(e);
         }
     }
-
 
 }
