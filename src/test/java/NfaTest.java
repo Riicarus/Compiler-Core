@@ -1,3 +1,4 @@
+import io.github.riicarus.common.util.CharUtil;
 import io.github.riicarus.common.util.RegexParser;
 import io.github.riicarus.front.lexer.NfaEdge;
 import io.github.riicarus.front.lexer.NFA;
@@ -35,23 +36,29 @@ public class NfaTest {
 
     @Test
     public void testEpsClosureNFA() {
-        NFA nfa = RegexParser.reToNFA("a[b|c]^");
+        NFA nfa = RegexParser.reToNFA("a(b|c)*");
         System.out.println(nfa);
-        System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), NfaEdge.EPS_TRANS_VALUE));
+        System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), CharUtil.EPS_TRANS_VALUE));
         System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), 'b'));
         System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), 'c'));
     }
 
     @Test
     public void testReToNFA() {
-        String expr = "a[b|c]^";
+        String expr = "a(b|c)*";
 //        String expr = "cd";
-        System.out.println(RegexParser.reToNFA(expr));
+        System.out.println(RegexParser.reToNFA(expr, CharUtil.PASCAL_CHAR_SET));
+    }
+
+    @Test
+    public void testReToNfaWithEscapeLetter() {
+        String expr = "a\\(\\*\\)(b|c)*";
+        System.out.println(RegexParser.reToNFA(expr, CharUtil.PASCAL_CHAR_SET));
     }
 
     @Test
     public void testMergeNFA() {
-        System.out.println(NFA.merge(List.of(RegexParser.reToNFA("a[b|c]^"), RegexParser.reToNFA("abc"))));
+        System.out.println(NFA.merge(List.of(RegexParser.reToNFA("a(b|c)*"), RegexParser.reToNFA("abc"))));
         System.out.println(NFA.merge(List.of(RegexParser.reToNFA("a"), RegexParser.reToNFA("b"), RegexParser.reToNFA("cd"))));
     }
 

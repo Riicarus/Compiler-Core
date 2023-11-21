@@ -1,5 +1,7 @@
 package io.github.riicarus.front.lexer;
 
+import io.github.riicarus.common.util.CharUtil;
+
 import java.util.*;
 
 /**
@@ -62,7 +64,7 @@ public class NFA {
 
             for (NfaEdge e : nfaEdges) {
                 // 从 State s 开始, 通过 eps 转换的边
-                if (e.getFromState() == s && e.getTransValue() == NfaEdge.EPS_TRANS_VALUE) {
+                if (e.getFromState() == s && e.getTransValue() == CharUtil.EPS_TRANS_VALUE) {
                     int u = e.getToState();
                     if (!epsClosure.contains(u)) {
                         epsClosure.add(u);

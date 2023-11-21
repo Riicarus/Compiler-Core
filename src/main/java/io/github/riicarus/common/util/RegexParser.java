@@ -10,6 +10,8 @@ import java.util.Stack;
  *
  * <p>仅支持 ASCII 字符集.</p>
  * <p>支持转义字符, 注意转义之后的字符会使用 ASCII 之外的一些字符表示.</p>
+ * <p>字符转义发生在正则转换为中缀表达式的过程中.</p>
+ * <p>转义后的非 ASCII 字符仅在正则中缀表达式和后缀表达式中生效, 在 NFA 中会被转换为原字符.</p>
  * <p>可转义字符包括: '(', ')', '*', '.', '|'</p>
  *
  * @author Riicarus
@@ -17,7 +19,6 @@ import java.util.Stack;
  * @since 1.0.0
  */
 public class RegexParser {
-
 
     /**
      * 将正则表达式转换为 NFA.
@@ -51,6 +52,10 @@ public class RegexParser {
     private static NFA reSuffixToNFA(String reSuffix, Set<Character> inputCharSet) {
         Stack<NFA> nfaStack = new Stack<>();
 
+        if (inputCharSet == null || inputCharSet.isEmpty()) {
+            inputCharSet = CharUtil.getDefaultASCIICharSet();
+        }
+
         int ID = -1;
 
         for (int i = 0; i < reSuffix.length(); i++) {
@@ -67,16 +72,14 @@ public class RegexParser {
             } else if (tmp == CharUtil.CLOSURE) {
                 nfaStack.push(NFA.closure(nfaStack.pop()));
             } else {    // 如果 tmp 不是功能符号, 就生成一条边.
-                // 如果所有字符都可以使用
-                if (inputCharSet == null || inputCharSet.isEmpty()) {
+                // 必须先判断是否合法.
+                if (inputCharSet.contains(tmp)) {
+                    // 可能会转义回原字符
+                    if (CharUtil.shouldEscapeBack(tmp)) tmp = CharUtil.escapeBack(tmp);
+
                     nfaStack.push(new NFA(tmp));
                 } else {
-                    // 如果只有一些字符能使用, 必须先判断是否合法.
-                    if (inputCharSet.contains(tmp)) {
-                        nfaStack.push(new NFA(tmp));
-                    } else {
-                        throw new IllegalStateException("reSuffixToNFA(): Forbidden character.");
-                    }
+                    throw new IllegalStateException("reSuffixToNFA(): Forbidden character.");
                 }
             }
         }
@@ -91,24 +94,45 @@ public class RegexParser {
      * @return 正则表达式的中缀表达式
      */
     private static String reToInfix(String expr) {
+        final char END = '\0';
+
         StringBuilder infixBuilder = new StringBuilder();
+        boolean needEscape = false;
         for (int i = 0; i < expr.length(); i++) {
             char tmp = expr.charAt(i);
             char next;
 
             if (i == expr.length() - 1)
-                next = '\0';
+                next = END;
             else
                 next = expr.charAt(i + 1);
 
-            // 如果表示的是连接操作, 如: "ab", 就转换成 "a.b"; 否则直接拼接字符.
+            // 不需要转义的时候, 遇到转义字符, 设置为需要转义, 直接解析下一个字符.
+            if (!needEscape && tmp == CharUtil.BACKSLASH) {
+                needEscape = true;
+                continue;
+            }
+
+            // 如果有转义字符, 将其转义
+            if (needEscape) {
+                if (CharUtil.canEscape(tmp)) {
+                    tmp = CharUtil.escape(tmp);
+                } else {
+                    throw new IllegalArgumentException("Regex parse error: Can not escape letter: " + tmp);
+                }
+                needEscape = false;
+            }
+
             if (tmp != CharUtil.L_BRACKET && tmp != CharUtil.CONCAT && tmp != CharUtil.UNION && next != CharUtil.R_BRACKET &&
-                    next != CharUtil.CLOSURE && next != CharUtil.UNION && next != CharUtil.CONCAT && next != '\0') {
+                    next != CharUtil.CLOSURE && next != CharUtil.UNION && next != CharUtil.CONCAT && next != END) {
+                // 如果表示的是连接操作(tmp 和 next 都不是可连接的功能性字符), 如: "ab", 就转换成 "a.b"; 否则直接拼接字符.
                 infixBuilder.append(tmp).append(CharUtil.CONCAT);
             } else {
                 infixBuilder.append(tmp);
             }
         }
+
+        // System.out.println(infixBuilder);
 
         return infixBuilder.toString();
     }
@@ -161,8 +185,26 @@ public class RegexParser {
         if (inputCharSet == null || inputCharSet.isEmpty())
             inputCharSet = CharUtil.getDefaultASCIICharSet();
 
+        boolean needEscape = false;
+
         for (int i = 0; i < expr.length(); i++) {
             char c = expr.charAt(i);
+
+            // 转义的判断是最优先的.
+            if (!needEscape && c == CharUtil.BACKSLASH) {
+                needEscape = true;
+                continue;
+            }
+            if (needEscape) {
+                if (CharUtil.canEscape(c)) {
+                    needEscape = false;
+                    continue;
+                } else {
+                    return false;
+                }
+            }
+
+            // 判断非转义字符
             if (inputCharSet.contains(c)) continue;
             if (c == CharUtil.UNION || c == CharUtil.CLOSURE || c == CharUtil.CONCAT) continue;
 
@@ -183,13 +225,15 @@ public class RegexParser {
                     return false;
                 } else {
                     next = expr.charAt(i + 1);
-                    if (next == CharUtil.UNION || next == CharUtil.CLOSURE || next == CharUtil.CONCAT || next == CharUtil.R_BRACKET) return false;
+                    if (next == CharUtil.UNION || next == CharUtil.CLOSURE || next == CharUtil.CONCAT || next == CharUtil.R_BRACKET)
+                        return false;
                 }
             } else if (c == CharUtil.CONCAT) {
                 if (i == 0 || i == expr.length() - 1) return false;
                 else {
                     next = expr.charAt(i + 1);
-                    if (next == CharUtil.UNION || next == CharUtil.CLOSURE || next == CharUtil.CONCAT || next == CharUtil.R_BRACKET) return false;
+                    if (next == CharUtil.UNION || next == CharUtil.CLOSURE || next == CharUtil.CONCAT || next == CharUtil.R_BRACKET)
+                        return false;
                 }
             } else if (c == CharUtil.CLOSURE) {
                 if (i == 0) return false;

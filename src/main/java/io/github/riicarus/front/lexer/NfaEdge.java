@@ -1,5 +1,7 @@
 package io.github.riicarus.front.lexer;
 
+import io.github.riicarus.common.util.CharUtil;
+
 /**
  * NFA 的一条边.
  *
@@ -17,9 +19,6 @@ public class NfaEdge {
 
     // 边的转换值
     private final char transValue;
-
-    // 使用一个不是 ASCII 的 char 进行标志
-    public static final char EPS_TRANS_VALUE = (char) 128;
 
     /**
      * 创建一个边.
@@ -43,7 +42,7 @@ public class NfaEdge {
     public NfaEdge(int fromState, int toState) {
         this.fromState = fromState;
         this.toState = toState;
-        this.transValue = EPS_TRANS_VALUE;
+        this.transValue = CharUtil.EPS_TRANS_VALUE;
     }
 
     public int getFromState() {
@@ -60,6 +59,6 @@ public class NfaEdge {
 
     @Override
     public String toString() {
-        return fromState + "--" + transValue + "-->" + toState;
+        return fromState + "--" + (transValue == CharUtil.EPS_TRANS_VALUE ? "eps" : transValue) + "-->" + toState;
     }
 }

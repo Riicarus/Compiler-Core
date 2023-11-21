@@ -25,12 +25,12 @@ public enum LexicalSymbol {
     EQ("=", 12, "="), NE("<>", 13, "<>"),
     LE("<=", 14, "<="), LT("<", 15, "<"),
     GE(">=", 16, ">="), GT(">", 17, ">"),
-    MINUS("-", 18, "-"), TIMES("*", 19, "*"),
+    MINUS("-", 18, "-"), TIMES("*", 19, "\\*"),
     ASSIGN(":=", 20, ":="),
-    L_PAREN("(", 21, "("), R_PAREN(")", 22, ")"),
+    L_PAREN("(", 21, "\\("), R_PAREN(")", 22, "\\)"),
     SEMICOLON(";", 23, ";"),
-    EMPTY_SPACE(" ", 24, "[ ][ ]^"),
-    EOL("EOL", 25, "[\r]^\n"), EOF("EOF", 26, String.valueOf((char) 26));
+    EMPTY_SPACE(" ", 24, "( )( )*"),
+    EOL("EOL", 25, "(\r)*\n"), EOF("EOF", 26, String.valueOf((char) 26));
 
     private final String name;
 
