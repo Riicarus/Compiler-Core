@@ -35,7 +35,7 @@ public class NfaTest {
 
     @Test
     public void testEpsClosureNFA() {
-        NFA nfa = NFA.reToNFA("a[b|c]^");
+        NFA nfa = RegexParser.reToNFA("a[b|c]^");
         System.out.println(nfa);
         System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), NfaEdge.EPS_TRANS_VALUE));
         System.out.println(nfa.epsClosureMove(nfa.epsClosureOfState(1), 'b'));
