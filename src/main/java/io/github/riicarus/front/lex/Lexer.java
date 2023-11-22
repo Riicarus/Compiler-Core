@@ -1,4 +1,4 @@
-package io.github.riicarus.front.lexer;
+package io.github.riicarus.front.lex;
 
 import io.github.riicarus.common.data.Token;
 

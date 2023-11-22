@@ -1,7 +1,7 @@
 import io.github.riicarus.common.util.CharUtil;
 import io.github.riicarus.common.util.RegexParser;
-import io.github.riicarus.front.lexer.NfaEdge;
-import io.github.riicarus.front.lexer.NFA;
+import io.github.riicarus.front.lex.NfaEdge;
+import io.github.riicarus.front.lex.NFA;
 import org.junit.Test;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package io.github.riicarus.common.data;
 
-import io.github.riicarus.front.lexer.LexicalSymbol;
+import io.github.riicarus.front.lex.LexicalSymbol;
 
 import java.util.Objects;
 

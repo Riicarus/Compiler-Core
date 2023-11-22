@@ -1,4 +1,4 @@
-import io.github.riicarus.front.lexer.Lexer;
+import io.github.riicarus.front.lex.Lexer;
 import org.junit.Test;
 
 /**

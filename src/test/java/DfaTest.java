@@ -1,8 +1,8 @@
 import io.github.riicarus.common.util.RegexParser;
-import io.github.riicarus.front.lexer.LexicalSymbol;
+import io.github.riicarus.front.lex.LexicalSymbol;
 import io.github.riicarus.common.data.Token;
-import io.github.riicarus.front.lexer.DFA;
-import io.github.riicarus.front.lexer.NFA;
+import io.github.riicarus.front.lex.DFA;
+import io.github.riicarus.front.lex.NFA;
 import org.junit.Test;
 
 import java.util.List;

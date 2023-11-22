@@ -1,8 +1,8 @@
 package io.github.riicarus;
 
 import io.github.riicarus.common.data.Token;
-import io.github.riicarus.front.lexer.Lexer;
-import io.github.riicarus.front.lexer.LexicalSymbol;
+import io.github.riicarus.front.lex.Lexer;
+import io.github.riicarus.front.lex.LexicalSymbol;
 
 import java.io.*;
 import java.util.ArrayList;

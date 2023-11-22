@@ -1,6 +1,6 @@
 package io.github.riicarus.common.util;
 
-import io.github.riicarus.front.lexer.NFA;
+import io.github.riicarus.front.lex.NFA;
 
 import java.util.Set;
 import java.util.Stack;
