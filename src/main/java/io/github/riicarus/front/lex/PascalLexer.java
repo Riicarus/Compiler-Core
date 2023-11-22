@@ -43,7 +43,7 @@ public class PascalLexer implements Lexer {
      * @return 词法符号列表
      */
     @Override
-    public List<Token> analyze(char[] input) {
+    public List<Token> parse(char[] input) {
         List<Token> tokenList = new LinkedList<>();
 
         buffer = input;
@@ -52,7 +52,7 @@ public class PascalLexer implements Lexer {
         lineIdx = 0;
 
         while (cur < buffer.length) {
-            final Token token = analyzeOne();
+            final Token token = parseOne();
 
             token.setLine(line);
 
@@ -74,7 +74,7 @@ public class PascalLexer implements Lexer {
      *
      * @return Token
      */
-    private Token analyzeOne() {
+    private Token parseOne() {
         char[] s = Arrays.copyOfRange(buffer, cur, buffer.length);
 
         final Token token = LexicalSymbol.validateLongest(String.valueOf(s), Set.of(PascalLexicalSymbol.values()));

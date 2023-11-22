@@ -46,7 +46,7 @@ public class Compiler {
             while ((line = reader.readLine()) != null) lines.add(line);
 
             List<Token> tokenList = new ArrayList<>();
-            lines.forEach(l -> tokenList.addAll(lexer.analyze(l.toCharArray())));
+            lines.forEach(l -> tokenList.addAll(lexer.parse(l.toCharArray())));
 
             StringBuilder dydSB = new StringBuilder();
             tokenList.forEach(t -> dydSB.append(t).append('\n'));

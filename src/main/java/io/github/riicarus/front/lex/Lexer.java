@@ -20,6 +20,6 @@ public interface Lexer {
      * @param input 输入串
      * @return 词法符号列表
      */
-    List<Token> analyze(char[] input);
+    List<Token> parse(char[] input);
 
 }

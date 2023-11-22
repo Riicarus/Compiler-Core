@@ -12,7 +12,7 @@ public class PascalLexerTest {
     public void testAnalyze() {
         PascalLexer pascalLexer = new PascalLexer();
         long time = System.currentTimeMillis();
-        System.out.println(pascalLexer.analyze("begin := F - * read(123) \r\n abc \n 123 \n end".toCharArray()));
+        System.out.println(pascalLexer.parse("begin := F - * read(123) \r\n abc \n 123 \n end".toCharArray()));
         System.out.println(System.currentTimeMillis() - time);
     }
 
