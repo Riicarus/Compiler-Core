@@ -1,4 +1,5 @@
 import io.github.riicarus.Compiler;
+import io.github.riicarus.front.lex.PascalLexer;
 import org.junit.Test;
 
 /**
@@ -10,12 +11,12 @@ public class CompilerTest {
 
     @Test
     public void testCompiler() {
-        Compiler compiler = new Compiler();
+        Compiler compiler = new Compiler(new PascalLexer());
 
         int loopCnt = 100;
         long t0 = System.currentTimeMillis();
         for (int i = 1; i < loopCnt; i++) {
-            compiler.compile("D:/tmp/compiler", "program");
+            compiler.compile("D:/tmp/compiler", "program", "pas", "dys");
         }
 
         long t1 = System.currentTimeMillis();

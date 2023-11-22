@@ -53,7 +53,7 @@ public class Token {
 
     @Override
     public String toString() {
-        return "<" + symbol.getCode() + ", " + (symbol.isNeedPrintVal() ? lexeme : "_") + ">";
+        return "<" + symbol.getCode() + ", " + (symbol.needPrintVal() ? lexeme : "_") + ">";
     }
 
     @Override

@@ -1,5 +1,5 @@
 import io.github.riicarus.common.util.RegexParser;
-import io.github.riicarus.front.lex.LexicalSymbol;
+import io.github.riicarus.front.lex.PascalLexicalSymbol;
 import io.github.riicarus.common.data.Token;
 import io.github.riicarus.front.lex.DFA;
 import io.github.riicarus.front.lex.NFA;
@@ -52,7 +52,7 @@ public class DfaTest {
         System.out.println(numberDfa.validateString("123c4"));
 
         Token target = null;
-        for (LexicalSymbol symbol : LexicalSymbol.values()) {
+        for (PascalLexicalSymbol symbol : PascalLexicalSymbol.values()) {
             final Token token = symbol.validate("\r\n");
 
             if (token == null) continue;

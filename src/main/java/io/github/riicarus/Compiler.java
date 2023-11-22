@@ -2,7 +2,6 @@ package io.github.riicarus;
 
 import io.github.riicarus.common.data.Token;
 import io.github.riicarus.front.lex.Lexer;
-import io.github.riicarus.front.lex.LexicalSymbol;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -17,32 +16,29 @@ import java.util.List;
  */
 public class Compiler {
 
-    static {
-        System.out.println("Lexer DFA building...");
-        long time = System.currentTimeMillis();
-        LexicalSymbol.avoidLazyLoad();
-        System.out.println("Lexer DFA build finished, time used: " + (System.currentTimeMillis() - time) + "ms");
+    private final Lexer lexer;
+
+    public Compiler(Lexer lexer) {
+        this.lexer = lexer;
     }
 
-    private final Lexer lexer = new Lexer();
-
-    public void compile(String dir, String name) {
+    public void compile(String dir, String name, String srcSuffix, String lexSuffix) {
         System.out.println("Compiling...");
         long timestamp = System.currentTimeMillis();
 
-        lex(dir, name);
+        lex(dir, name, srcSuffix, lexSuffix);
 
         System.out.println("Compile finished, time used: " + (System.currentTimeMillis() - timestamp) + "ms");
     }
 
-    private void lex(String dir, String name) {
+    private void lex(String dir, String name, String srcSuffix, String lexSuffix) {
         System.out.println("Lexer parsing...");
         long timestamp = System.currentTimeMillis();
-        String pasFilePath = dir + "/" + name + ".pas";
-        String dydFilePath = dir + "/" + name + ".dys";
+        String srcFilePath = dir + "/" + name + "." + srcSuffix;
+        String lexFilePath = dir + "/" + name + "." + lexSuffix;
         try (
-                BufferedReader reader = new BufferedReader(new FileReader(pasFilePath));
-                BufferedWriter writer = new BufferedWriter(new FileWriter(dydFilePath, false))
+                BufferedReader reader = new BufferedReader(new FileReader(srcFilePath));
+                BufferedWriter writer = new BufferedWriter(new FileWriter(lexFilePath, false))
         ) {
 
             List<String> lines = new ArrayList<>();
