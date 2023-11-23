@@ -119,4 +119,9 @@ public class CharUtil {
     public static final String IDENTIFIER_REGEX = L_BRACKET + LETTER_REGEX + R_BRACKET + L_BRACKET + LETTER_REGEX + UNION + DIGIT_REGEX + R_BRACKET + CLOSURE;
     public static final String NUMBER_REGEX = L_BRACKET + DIGIT_REGEX + R_BRACKET + L_BRACKET + DIGIT_REGEX + R_BRACKET + CLOSURE;
 
+    public static final String SYNTAX_CONCAT = " ";
+    public static final String SYNTAX_UNION = " \\| ";
+    public static final String SYNTAX_ARROW = " -> ";
+    public static final String SYNTAX_SEPARATOR = "%%";
+
 }
