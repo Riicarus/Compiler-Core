@@ -1,7 +1,5 @@
 package io.github.riicarus.front.syntax;
 
-import io.github.riicarus.front.syntax.ll1.LL1SyntaxSymbol;
-
 import java.util.List;
 import java.util.Set;
 

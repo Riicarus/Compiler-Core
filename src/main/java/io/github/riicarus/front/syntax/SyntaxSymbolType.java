@@ -9,6 +9,6 @@ package io.github.riicarus.front.syntax;
  */
 public enum SyntaxSymbolType {
 
-    TERMINAL, NON_TERMINAL;
+    TERMINAL, NON_TERMINAL
 
 }
