@@ -75,7 +75,7 @@ public class RegexParser {
                 // 必须先判断是否合法.
                 if (inputCharSet.contains(tmp)) {
                     // 可能会转义回原字符
-                    if (CharUtil.shouldEscapeBack(tmp)) tmp = CharUtil.escapeBack(tmp);
+                    if (CharUtil.shouldRegexEscapeBack(tmp)) tmp = CharUtil.escapeRegexBack(tmp);
 
                     nfaStack.push(new NFA(tmp));
                 } else {
@@ -115,8 +115,8 @@ public class RegexParser {
 
             // 如果有转义字符, 将其转义
             if (needEscape) {
-                if (CharUtil.canEscape(tmp)) {
-                    tmp = CharUtil.escape(tmp);
+                if (CharUtil.canRegexEscape(tmp)) {
+                    tmp = CharUtil.escapeRegex(tmp);
                 } else {
                     throw new IllegalArgumentException("Regex parse error: Can not escape letter: " + tmp);
                 }
@@ -158,7 +158,7 @@ public class RegexParser {
                 }
                 op.pop();
             } else if (tmp == CharUtil.CLOSURE || tmp == CharUtil.CONCAT || tmp == CharUtil.UNION) {
-                while (!op.isEmpty() && op.peek() != CharUtil.L_BRACKET && CharUtil.precedence(tmp) <= CharUtil.precedence(op.peek())) {
+                while (!op.isEmpty() && op.peek() != CharUtil.L_BRACKET && CharUtil.regexPrecedence(tmp) <= CharUtil.regexPrecedence(op.peek())) {
                     suffixBuilder.append(op.pop());
                 }
                 op.push(tmp);
@@ -196,7 +196,7 @@ public class RegexParser {
                 continue;
             }
             if (needEscape) {
-                if (CharUtil.canEscape(c)) {
+                if (CharUtil.canRegexEscape(c)) {
                     needEscape = false;
                     continue;
                 } else {

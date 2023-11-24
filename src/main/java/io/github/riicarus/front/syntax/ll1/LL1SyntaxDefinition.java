@@ -33,15 +33,19 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
 
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty() && !line.equals(CharUtil.SYNTAX_SEPARATOR)) {
-                terminalSymbolSet.add(new LL1SyntaxSymbol(line, true));
+                terminalSymbolSet.add(new LL1SyntaxSymbol(handleEscapeBack(handleEscape(line)), true));
             }
 
             while ((line = reader.readLine()) != null && !line.isEmpty() && !line.equals(CharUtil.SYNTAX_SEPARATOR)) {
-                nonterminalSymbolSet.add(new LL1SyntaxSymbol(line, false));
+                final LL1SyntaxSymbol symbol = new LL1SyntaxSymbol(handleEscapeBack(handleEscape(line)), false);
+                if (terminalSymbolSet.contains(symbol))
+                    throw new IllegalStateException("Load LL1Syntax definition failed: Syntax definition error: symbol \"" + symbol + "\" has already been defined as terminal symbol.");
+
+                nonterminalSymbolSet.add(symbol);
             }
 
             while ((line = reader.readLine()) != null && !line.isEmpty() && !line.equals(CharUtil.SYNTAX_SEPARATOR)) {
-                syntaxStringList.add(line);
+                syntaxStringList.add(handleEscape(line));
             }
 
             if (terminalSymbolSet.isEmpty() || nonterminalSymbolSet.isEmpty() || syntaxStringList.isEmpty()) {
@@ -52,12 +56,12 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
             nonterminalSymbolSet.forEach(s -> syntaxSymbolMap.put(s.getName(), s));
 
             for (String expr : syntaxStringList) {
-                String[] headBodyParts = expr.split(CharUtil.SYNTAX_ARROW);
+                String[] headBodyParts = expr.split(CharUtil.SYNTAX_DEFINE);
                 if (headBodyParts.length != 2) {
                     throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition is wrong, need: \"head -> body\", get: " + expr);
                 }
 
-                SyntaxSymbol head = syntaxSymbolMap.get(headBodyParts[0]);
+                SyntaxSymbol head = syntaxSymbolMap.get(handleEscapeBack(headBodyParts[0]));
                 if (head == null) {
                     throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition is wrong, can not find symbol: " + headBodyParts[0]);
                 }
@@ -81,7 +85,7 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
             List<SyntaxSymbol> symbols = new ArrayList<>();
             String[] concatParts = bodyUnionPart.split(CharUtil.SYNTAX_CONCAT);
             for (String concatPart : concatParts) {
-                SyntaxSymbol symbol = syntaxSymbolMap.get(concatPart);
+                SyntaxSymbol symbol = syntaxSymbolMap.get(handleEscapeBack(concatPart));
                 if (symbol == null) {
                     throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition is wrong, can not find symbol: " + concatPart);
                 }
@@ -96,6 +100,48 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
 
     @Override
     public void load() {
+    }
+
+    private String handleEscape(String s) {
+        StringBuilder sb = new StringBuilder();
+
+        boolean needEscape = false;
+        for (int i = 0; i < s.length(); i++) {
+            char tmp = s.charAt(i);
+
+            if (!needEscape && tmp == CharUtil.BACKSLASH) {
+                needEscape = true;
+                continue;
+            }
+
+            if (needEscape) {
+                if (CharUtil.canSyntaxEscape(tmp)) {
+                    tmp = CharUtil.escapeSyntax(tmp);
+                } else {
+                    throw new IllegalArgumentException("Parsing escape letter error, can not escape letter: " + tmp);
+                }
+                needEscape = false;
+            }
+
+            sb.append(tmp);
+        }
+
+        return sb.toString();
+    }
+
+    private String handleEscapeBack(String s) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < s.length(); i++) {
+            char tmp = s.charAt(i);
+
+            if (CharUtil.shouldSyntaxEscapeBack(tmp))
+                tmp = CharUtil.escapeSyntaxBack(tmp);
+
+            sb.append(tmp);
+        }
+
+        return sb.toString();
     }
 
     @Override

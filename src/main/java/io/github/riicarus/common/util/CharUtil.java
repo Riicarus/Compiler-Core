@@ -39,7 +39,7 @@ public class CharUtil {
         return FUNCTIONAL_CHAR_SET.contains(c);
     }
 
-    private static final Map<Character, Character> ESCAPE_CHAR_MAP = Map.of(
+    private static final Map<Character, Character> REGEX_ESCAPE_CHAR_MAP = Map.of(
             L_BRACKET, L_BRACKET_ESCAPED,
             R_BRACKET, R_BRACKET_ESCAPED,
             CLOSURE, CLOSURE_ESCAPED,
@@ -48,25 +48,25 @@ public class CharUtil {
             BACKSLASH, BACKSLASH_ESCAPED
     );
 
-    private static final Map<Character, Character> ESCAPE_BACK_CHAR_MAP = ESCAPE_CHAR_MAP.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+    private static final Map<Character, Character> REGEX_ESCAPE_BACK_CHAR_MAP = REGEX_ESCAPE_CHAR_MAP.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 
-    public static boolean canEscape(char c) {
-        return ESCAPE_CHAR_MAP.containsKey(c);
+    public static boolean canRegexEscape(char c) {
+        return REGEX_ESCAPE_CHAR_MAP.containsKey(c);
     }
 
-    public static char escape(char c) {
-        return ESCAPE_CHAR_MAP.get(c);
+    public static char escapeRegex(char c) {
+        return REGEX_ESCAPE_CHAR_MAP.get(c);
     }
 
-    public static boolean shouldEscapeBack(char c) {
-        return ESCAPE_BACK_CHAR_MAP.containsKey(c);
+    public static boolean shouldRegexEscapeBack(char c) {
+        return REGEX_ESCAPE_BACK_CHAR_MAP.containsKey(c);
     }
 
-    public static char escapeBack(char c) {
-        return ESCAPE_BACK_CHAR_MAP.get(c);
+    public static char escapeRegexBack(char c) {
+        return REGEX_ESCAPE_BACK_CHAR_MAP.get(c);
     }
 
-    public static int precedence(char c) {
+    public static int regexPrecedence(char c) {
         switch (c) {
             case CLOSURE -> {
                 return 3;
@@ -111,7 +111,7 @@ public class CharUtil {
         }
 
         PASCAL_CHAR_SET.addAll(List.of('*', '-', '(', ')', '\n', '\r', ' ', (char) 26));
-        PASCAL_CHAR_SET.addAll(ESCAPE_CHAR_MAP.values());
+        PASCAL_CHAR_SET.addAll(REGEX_ESCAPE_CHAR_MAP.values());
     }
 
     public static final String LETTER_REGEX = "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z";
@@ -119,9 +119,44 @@ public class CharUtil {
     public static final String IDENTIFIER_REGEX = L_BRACKET + LETTER_REGEX + R_BRACKET + L_BRACKET + LETTER_REGEX + UNION + DIGIT_REGEX + R_BRACKET + CLOSURE;
     public static final String NUMBER_REGEX = L_BRACKET + DIGIT_REGEX + R_BRACKET + L_BRACKET + DIGIT_REGEX + R_BRACKET + CLOSURE;
 
+    /*
+     * 对文法中需要用到的符号进行定义和处理.
+     * */
     public static final String SYNTAX_CONCAT = " ";
     public static final String SYNTAX_UNION = " \\| ";
-    public static final String SYNTAX_ARROW = " -> ";
-    public static final String SYNTAX_SEPARATOR = "%%";
+    public static final String SYNTAX_DEFINE = " : ";
+    public static final String SYNTAX_SEPARATOR = "%";
+
+    public static final char COLON = ':';
+    public static final char VERTICAL_LINE = '|';
+    public static final char PERCENTAGE = '%';
+    public static final char COLON_ESCAPED = (char) 135;
+    public static final char VERTICAL_LINE_ESCAPED = (char) 136;
+    public static final char PERCENTAGE_ESCAPED = (char) 137;
+
+    private static final Map<Character, Character> SYNTAX_ESCAPE_CHAR_MAP = Map.of(
+            COLON, COLON_ESCAPED,
+            VERTICAL_LINE, VERTICAL_LINE_ESCAPED,
+            BACKSLASH, BACKSLASH_ESCAPED,
+            PERCENTAGE, PERCENTAGE_ESCAPED
+    );
+
+    private static final Map<Character, Character> SYNTAX_ESCAPE_BACK_CHAR_MAP = SYNTAX_ESCAPE_CHAR_MAP.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+
+    public static boolean canSyntaxEscape(char c) {
+        return SYNTAX_ESCAPE_CHAR_MAP.containsKey(c);
+    }
+
+    public static char escapeSyntax(char c) {
+        return SYNTAX_ESCAPE_CHAR_MAP.get(c);
+    }
+
+    public static boolean shouldSyntaxEscapeBack(char c) {
+        return SYNTAX_ESCAPE_BACK_CHAR_MAP.containsKey(c);
+    }
+
+    public static char escapeSyntaxBack(char c) {
+        return SYNTAX_ESCAPE_BACK_CHAR_MAP.get(c);
+    }
 
 }

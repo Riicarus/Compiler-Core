@@ -38,12 +38,12 @@ public class LL1SyntaxSymbol implements SyntaxSymbol {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LL1SyntaxSymbol that = (LL1SyntaxSymbol) o;
-        return Objects.equals(name, that.name) && type == that.type;
+        return Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type);
+        return Objects.hash(name);
     }
 
     @Override
