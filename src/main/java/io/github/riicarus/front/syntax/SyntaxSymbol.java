@@ -13,4 +13,6 @@ public interface SyntaxSymbol {
 
     SyntaxSymbolType getType();
 
+    boolean isTerminal();
+
 }

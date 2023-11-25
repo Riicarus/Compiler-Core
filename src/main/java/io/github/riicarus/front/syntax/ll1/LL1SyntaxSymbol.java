@@ -34,6 +34,11 @@ public class LL1SyntaxSymbol implements SyntaxSymbol {
     }
 
     @Override
+    public boolean isTerminal() {
+        return SyntaxSymbolType.TERMINAL.equals(type);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

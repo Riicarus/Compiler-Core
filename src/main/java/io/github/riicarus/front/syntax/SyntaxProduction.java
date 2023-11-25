@@ -26,32 +26,4 @@ public interface SyntaxProduction {
      */
     Set<List<SyntaxSymbol>> getBody();
 
-    /**
-     * 获取 FIRST 集
-     *
-     * @return FIRST 集
-     */
-    Set<Character> getFirstSet();
-
-    /**
-     * 获取 FOLLOW 集.
-     *
-     * @return FOLLOW 集
-     */
-    Set<Character> getFollowerSet();
-
-    /**
-     * 添加符号到 FIRST 集合.
-     *
-     * @param c 开始符号
-     */
-    void addFirst(char c);
-
-    /**
-     * 添加符号到 FOLLOW 集合.
-     *
-     * @param c 跟随符号
-     */
-    void addFollow(char c);
-
 }

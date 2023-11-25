@@ -4,7 +4,6 @@ import io.github.riicarus.common.util.CharUtil;
 import io.github.riicarus.front.syntax.SyntaxDefinition;
 import io.github.riicarus.front.syntax.SyntaxProduction;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
-import io.github.riicarus.front.syntax.SyntaxSymbolType;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -21,10 +20,14 @@ import java.util.*;
 public class LL1SyntaxDefinition implements SyntaxDefinition {
 
     private final List<String> syntaxStringList = new ArrayList<>();
-    private final List<SyntaxProduction> syntaxProductionList = new ArrayList<>();
-    private final Map<String, SyntaxSymbol> syntaxSymbolMap = new HashMap<>();
-    private final Set<SyntaxSymbol> nullableSymbolSet = new HashSet<>();
+
     private SyntaxSymbol epsSymbol;
+    private final Map<String, SyntaxSymbol> syntaxSymbolMap = new HashMap<>();
+    private final List<SyntaxProduction> syntaxProductionList = new ArrayList<>();
+
+    private final Set<SyntaxSymbol> nullableSymbolSet = new HashSet<>();
+    private final Map<SyntaxSymbol, Set<SyntaxSymbol>> firstSet = new HashMap<>();
+    private final Map<SyntaxSymbol, Set<SyntaxSymbol>> followSet = new HashMap<>();
 
     @Override
     public void loadFrom(String path) {
@@ -70,27 +73,17 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
         terminalSymbolSet.forEach(s -> syntaxSymbolMap.put(s.getName(), s));
         nonterminalSymbolSet.forEach(s -> syntaxSymbolMap.put(s.getName(), s));
 
-        // 转换为文法产生式
-        for (String expr : syntaxStringList) {
-            String[] headBodyParts = expr.split(CharUtil.SYNTAX_DEFINE);
-            if (headBodyParts.length != 2) {
-                throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition is wrong, need: \"head -> body\", get: " + expr);
-            }
-
-            SyntaxSymbol head = syntaxSymbolMap.get(handleEscapeBack(headBodyParts[0]));
-            if (head == null) {
-                throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition is wrong, can not find symbol: " + headBodyParts[0]);
-            }
-
-            Set<List<SyntaxSymbol>> body = getBodyParts(headBodyParts[1]);
-            SyntaxProduction production = new LL1SyntaxProduction(head, body);
-            syntaxProductionList.add(production);
-        }
-        syntaxProductionList.forEach(System.out::println);
+        parseProduction();
 
         // 计算属性
         computeNullableSet();
-        System.out.println(nullableSymbolSet);
+        System.out.println("NULLABLE: " + nullableSymbolSet);
+
+        computeFirstSet();
+        System.out.println("FIRST:");
+        firstSet.forEach((k, v) -> System.out.println(k + ": " + v));
+
+        computeFollowSet();
     }
 
     private Set<List<SyntaxSymbol>> getBodyParts(String body) {
@@ -103,7 +96,7 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
             for (String concatPart : concatParts) {
                 SyntaxSymbol symbol = syntaxSymbolMap.get(handleEscapeBack(concatPart));
                 if (symbol == null) {
-                    throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition is wrong, can not find symbol: " + concatPart);
+                    throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, can not find symbol: " + concatPart);
                 }
 
                 symbols.add(symbol);
@@ -112,6 +105,31 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
         }
 
         return bodySymbolList;
+    }
+
+    private void parseProduction() {
+        for (String expr : syntaxStringList) {
+            String[] headBodyParts = expr.split(CharUtil.SYNTAX_DEFINE);
+            if (headBodyParts.length != 2) {
+                throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, need: \"head -> body\", get: " + expr);
+            }
+
+            SyntaxSymbol head = syntaxSymbolMap.get(handleEscapeBack(headBodyParts[0]));
+            if (head == null) {
+                throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, can not find symbol: " + headBodyParts[0]);
+            }
+
+            for (SyntaxProduction production : syntaxProductionList) {
+                if (production.getHead().equals(head)) {
+                    throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error: symbol: " + head + " has already been defined.");
+                }
+            }
+
+            Set<List<SyntaxSymbol>> body = getBodyParts(headBodyParts[1]);
+            SyntaxProduction production = new LL1SyntaxProduction(head, body);
+            syntaxProductionList.add(production);
+        }
+        syntaxProductionList.forEach(System.out::println);
     }
 
     @Override
@@ -161,40 +179,81 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
     }
 
     private void computeNullableSet() {
-        Set<SyntaxSymbol> newNullable = new HashSet<>();
-
-        do {
+        boolean hasNew = true;
+        while (hasNew) {
+            hasNew = false;
             for (SyntaxProduction production : syntaxProductionList) {
-                // 移出上一轮新找到的 nullable 文法符号.
-                if (nullableSymbolSet.contains(production.getHead())) {
-                    newNullable.remove(production.getHead());
-                    continue;
-                }
+                if (nullableSymbolSet.contains(production.getHead())) continue;
 
-                for (List<SyntaxSymbol> beta : production.getBody()) {
-                    if (beta.size() == 1 && SyntaxSymbolType.TERMINAL.equals(beta.get(0).getType()) && beta.get(0).equals(epsSymbol)) {
+                for (List<SyntaxSymbol> betaList : production.getBody()) {
+                    if (betaList.size() == 1 && betaList.get(0).isTerminal() && betaList.get(0).equals(epsSymbol)) {
                         // 如果是空终结符
-                        newNullable.add(production.getHead());
+                        hasNew = true;
                         nullableSymbolSet.add(production.getHead());
                         continue;
                     }
 
                     boolean hasTerminal = false;
-                    for (SyntaxSymbol symbol : beta) {
-                        hasTerminal = SyntaxSymbolType.TERMINAL.equals(symbol.getType());
+                    for (SyntaxSymbol symbol : betaList) {
+                        hasTerminal = symbol.isTerminal();
                         if (hasTerminal) break;
                     }
 
                     if (!hasTerminal) {
-                        if (nullableSymbolSet.containsAll(beta)) {
+                        if (nullableSymbolSet.containsAll(betaList)) {
                             // 如果是非终结符, 并且所有的终结符都是可能为空的.
-                            newNullable.add(production.getHead());
+                            hasNew = true;
                             nullableSymbolSet.add(production.getHead());
                         }
                     }
                 }
             }
-        } while (!newNullable.isEmpty());
+        }
+    }
+
+    private void computeFirstSet() {
+        for (SyntaxProduction production : syntaxProductionList) {
+            firstSet.put(production.getHead(), new HashSet<>());
+        }
+
+        boolean hasNew = true;
+        while (hasNew) {
+            hasNew = false;
+
+            for (SyntaxProduction production : syntaxProductionList) {
+                SyntaxSymbol head = production.getHead();
+                for (List<SyntaxSymbol> betaList : production.getBody()) {
+                    // 停止的条件是遇到终结符或者不可能为空的非终结符.
+                    for (SyntaxSymbol symbol : betaList) {
+                        if (symbol.isTerminal()) {
+                            if (!firstSet.get(head).contains(symbol)) {
+                                hasNew = true;
+                                firstSet.get(head).add(symbol);
+                            }
+                            break;
+                        }
+
+                        if (!firstSet.get(head).containsAll(firstSet.get(symbol))) {
+                            hasNew = true;
+                            firstSet.get(head).addAll(firstSet.get(symbol));
+                        }
+                        if (!nullableSymbolSet.contains(symbol)) break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void computeFollowSet() {
+
+    }
+
+    private static <T, E> boolean isSetMapAllEmpty(Map<T, Set<E>> map) {
+        for (Set<E> set : map.values()) {
+            if (!set.isEmpty()) return false;
+        }
+
+        return true;
     }
 
     @Override

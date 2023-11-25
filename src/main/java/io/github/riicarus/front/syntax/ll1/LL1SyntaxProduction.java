@@ -17,9 +17,6 @@ public class LL1SyntaxProduction implements SyntaxProduction {
     private final SyntaxSymbol head;
     private final Set<List<SyntaxSymbol>> body = new HashSet<>();
 
-    private final Set<Character> firstSet = new HashSet<>();
-    private final Set<Character> followSet = new HashSet<>();
-
     public LL1SyntaxProduction(SyntaxSymbol head, Set<List<SyntaxSymbol>> body) {
         this.head = head;
         this.body.addAll(body);
@@ -36,27 +33,20 @@ public class LL1SyntaxProduction implements SyntaxProduction {
     }
 
     @Override
-    public Set<Character> getFirstSet() {
-        return Collections.unmodifiableSet(firstSet);
-    }
-
-    @Override
-    public Set<Character> getFollowerSet() {
-        return Collections.unmodifiableSet(followSet);
-    }
-
-    @Override
-    public void addFirst(char c) {
-        firstSet.add(c);
-    }
-
-    @Override
-    public void addFollow(char c) {
-        followSet.add(c);
-    }
-
-    @Override
     public String toString() {
-        return head + " -> " + body + "; first: " + firstSet + " , follow: " + followSet;
+        return head + " -> " + body;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LL1SyntaxProduction that = (LL1SyntaxProduction) o;
+        return Objects.equals(head, that.head);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(head);
     }
 }
