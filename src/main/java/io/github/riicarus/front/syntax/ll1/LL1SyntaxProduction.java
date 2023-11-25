@@ -3,10 +3,7 @@ package io.github.riicarus.front.syntax.ll1;
 import io.github.riicarus.front.syntax.SyntaxProduction;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * LL1 文法产生式.
@@ -26,8 +23,6 @@ public class LL1SyntaxProduction implements SyntaxProduction {
     public LL1SyntaxProduction(SyntaxSymbol head, Set<List<SyntaxSymbol>> body) {
         this.head = head;
         this.body.addAll(body);
-        computeFirstSet();
-        computeFollowSet();
     }
 
     @Override
@@ -58,12 +53,6 @@ public class LL1SyntaxProduction implements SyntaxProduction {
     @Override
     public void addFollow(char c) {
         followSet.add(c);
-    }
-
-    private void computeFirstSet() {
-    }
-
-    private void computeFollowSet() {
     }
 
     @Override

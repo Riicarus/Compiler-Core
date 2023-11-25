@@ -29,7 +29,7 @@ public interface SyntaxDefinition {
      *
      * @return 文法定义列表
      */
-    List<SyntaxProduction> getSyntaxList();
+    List<SyntaxProduction> getSyntaxProductionList();
 
     /**
      * 获取文法符号集合.
