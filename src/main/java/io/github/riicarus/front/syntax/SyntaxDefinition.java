@@ -1,6 +1,7 @@
 package io.github.riicarus.front.syntax;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,5 +38,19 @@ public interface SyntaxDefinition {
      * @return 文法符号集合
      */
     Set<SyntaxSymbol> getSyntaxSymbolSet();
+
+    /**
+     * 获取分析表.
+     *
+     * @return 文法分析表
+     */
+    Map<SyntaxSymbol, Map<String, Set<SyntaxProduction>>> getAnalyzeMap();
+
+    /**
+     * 获取文法的开始符号.
+     *
+     * @return 文法的开始符号.
+     */
+    SyntaxSymbol getStartSymbol();
 
 }

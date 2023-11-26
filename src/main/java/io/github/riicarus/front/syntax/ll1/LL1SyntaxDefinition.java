@@ -22,6 +22,7 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
     private final List<String> syntaxStringList = new ArrayList<>();
 
     private SyntaxSymbol epsSymbol;
+    private SyntaxSymbol startSymbol;
     private final Map<String, SyntaxSymbol> syntaxSymbolMap = new HashMap<>();
     private final List<SyntaxProduction> syntaxProductionList = new ArrayList<>();
 
@@ -29,6 +30,7 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
     private final Map<SyntaxSymbol, Set<SyntaxSymbol>> firstSetMap = new HashMap<>();
     private final Map<SyntaxSymbol, Set<SyntaxSymbol>> followSetMap = new HashMap<>();
     private final Map<SyntaxProduction, Set<SyntaxSymbol>> firstSSetMap = new HashMap<>();
+    private final Map<SyntaxSymbol, Map<String, Set<SyntaxProduction>>> LL1AnalyzeMap = new HashMap<>();
 
     @Override
     public void loadFrom(String path) {
@@ -51,8 +53,16 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
                 terminalSymbolSet.add(new LL1SyntaxSymbol(handleEscapeBack(handleEscape(line)), true));
             }
 
+            int ithNonterminal = 0;
             while ((line = reader.readLine()) != null && !line.isEmpty() && !line.equals(CharUtil.SYNTAX_SEPARATOR)) {
                 final LL1SyntaxSymbol symbol = new LL1SyntaxSymbol(handleEscapeBack(handleEscape(line)), false);
+
+                // 文法符号定义区域中的第一个符号需要为开始符号.
+                if (ithNonterminal == 0) {
+                    startSymbol = symbol;
+                }
+                ithNonterminal++;
+
                 if (terminalSymbolSet.contains(symbol))
                     throw new IllegalStateException("Load LL1Syntax definition failed: Syntax definition error: symbol \"" + symbol + "\" has already been defined as terminal symbol.");
 
@@ -76,6 +86,8 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
 
         parseProduction();
 
+        System.out.println("StartSymbol: " + startSymbol);
+
         // 计算属性
         computeNullableSet();
         System.out.println("NULLABLE: " + nullableSymbolSet);
@@ -91,6 +103,16 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
         computeFirstSSet();
         System.out.println("FIRST_S:");
         firstSSetMap.forEach((k, v) -> System.out.println(k + ": " + v));
+
+        computeLL1AnalyzeMap();
+        System.out.println("LL1AnalyzeMap:");
+        LL1AnalyzeMap.forEach((t, setMap) ->
+                setMap.forEach((nt, pSet) -> {
+                            System.out.println(t.getName() + "--[" + nt + "]-->");
+                            pSet.forEach(p -> System.out.println("\t" + p));
+                        }
+                )
+        );
     }
 
     private Set<List<SyntaxSymbol>> getBodyParts(String body) {
@@ -318,12 +340,29 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
         firstSSetMap.get(production).addAll(followSetMap.get(head));
     }
 
-    private static <T, E> boolean isSetMapAllEmpty(Map<T, Set<E>> map) {
-        for (Set<E> set : map.values()) {
-            if (!set.isEmpty()) return false;
+    private void computeLL1AnalyzeMap() {
+        for (Map.Entry<SyntaxProduction, Set<SyntaxSymbol>> entry : firstSSetMap.entrySet()) {
+            SyntaxProduction production = entry.getKey();
+            if (production.getBody().size() == 0) continue;
+
+            SyntaxSymbol head = production.getHead();
+            for (SyntaxSymbol symbol : entry.getValue()) {
+                LL1AnalyzeMap.putIfAbsent(head, new HashMap<>());
+                LL1AnalyzeMap.get(head).putIfAbsent(symbol.getName(), new HashSet<>());
+
+                LL1AnalyzeMap.get(head).get(symbol.getName()).add(production);
+            }
         }
 
-        return true;
+        for (Map.Entry<SyntaxSymbol, Map<String, Set<SyntaxProduction>>> entry : LL1AnalyzeMap.entrySet()) {
+            for (Map.Entry<String, Set<SyntaxProduction>> innerEntry : entry.getValue().entrySet()) {
+                if (innerEntry.getValue().size() > 1) {
+                    throw new IllegalStateException("LL1Syntax not support: " +
+                            "there are more than 1 elements of transition map, " +
+                            "maybe you should eliminate left recursions or extract left common factors.");
+                }
+            }
+        }
     }
 
     @Override
@@ -334,5 +373,15 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
     @Override
     public Set<SyntaxSymbol> getSyntaxSymbolSet() {
         return new HashSet<>(syntaxSymbolMap.values());
+    }
+
+    @Override
+    public Map<SyntaxSymbol, Map<String , Set<SyntaxProduction>>> getAnalyzeMap() {
+        return LL1AnalyzeMap;
+    }
+
+    @Override
+    public SyntaxSymbol getStartSymbol() {
+        return startSymbol;
     }
 }
