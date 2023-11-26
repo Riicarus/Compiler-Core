@@ -15,9 +15,9 @@ import java.util.*;
 public class LL1SyntaxProduction implements SyntaxProduction {
 
     private final SyntaxSymbol head;
-    private final Set<List<SyntaxSymbol>> body = new HashSet<>();
+    private final List<SyntaxSymbol> body = new ArrayList<>();
 
-    public LL1SyntaxProduction(SyntaxSymbol head, Set<List<SyntaxSymbol>> body) {
+    public LL1SyntaxProduction(SyntaxSymbol head, List<SyntaxSymbol> body) {
         this.head = head;
         this.body.addAll(body);
     }
@@ -28,8 +28,8 @@ public class LL1SyntaxProduction implements SyntaxProduction {
     }
 
     @Override
-    public Set<List<SyntaxSymbol>> getBody() {
-        return Collections.unmodifiableSet(body);
+    public List<SyntaxSymbol> getBody() {
+        return Collections.unmodifiableList(body);
     }
 
     @Override
@@ -42,11 +42,11 @@ public class LL1SyntaxProduction implements SyntaxProduction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LL1SyntaxProduction that = (LL1SyntaxProduction) o;
-        return Objects.equals(head, that.head);
+        return Objects.equals(head, that.head) && Objects.deepEquals(body, that.body);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(head);
+        return Objects.hash(head, body);
     }
 }

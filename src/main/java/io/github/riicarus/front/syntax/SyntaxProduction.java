@@ -1,7 +1,6 @@
 package io.github.riicarus.front.syntax;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * 文法产生式
@@ -24,6 +23,6 @@ public interface SyntaxProduction {
      *
      * @return 产生式体中的符号集合
      */
-    Set<List<SyntaxSymbol>> getBody();
+    List<SyntaxSymbol> getBody();
 
 }

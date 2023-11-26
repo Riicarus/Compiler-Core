@@ -26,8 +26,9 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
     private final List<SyntaxProduction> syntaxProductionList = new ArrayList<>();
 
     private final Set<SyntaxSymbol> nullableSymbolSet = new HashSet<>();
-    private final Map<SyntaxSymbol, Set<SyntaxSymbol>> firstSet = new HashMap<>();
-    private final Map<SyntaxSymbol, Set<SyntaxSymbol>> followSet = new HashMap<>();
+    private final Map<SyntaxSymbol, Set<SyntaxSymbol>> firstSetMap = new HashMap<>();
+    private final Map<SyntaxSymbol, Set<SyntaxSymbol>> followSetMap = new HashMap<>();
+    private final Map<SyntaxProduction, Set<SyntaxSymbol>> firstSSetMap = new HashMap<>();
 
     @Override
     public void loadFrom(String path) {
@@ -81,9 +82,15 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
 
         computeFirstSet();
         System.out.println("FIRST:");
-        firstSet.forEach((k, v) -> System.out.println(k + ": " + v));
+        firstSetMap.forEach((k, v) -> System.out.println(k + ": " + v));
 
         computeFollowSet();
+        System.out.println("FOLLOW:");
+        followSetMap.forEach((k, v) -> System.out.println(k + ": " + v));
+
+        computeFirstSSet();
+        System.out.println("FIRST_S:");
+        firstSSetMap.forEach((k, v) -> System.out.println(k + ": " + v));
     }
 
     private Set<List<SyntaxSymbol>> getBodyParts(String body) {
@@ -125,9 +132,13 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
                 }
             }
 
-            Set<List<SyntaxSymbol>> body = getBodyParts(headBodyParts[1]);
-            SyntaxProduction production = new LL1SyntaxProduction(head, body);
-            syntaxProductionList.add(production);
+            Set<List<SyntaxSymbol>> bodySet = getBodyParts(headBodyParts[1]);
+            for (List<SyntaxSymbol> body : bodySet) {
+                // 注意, 需要移除掉空终结符.
+                body.remove(epsSymbol);
+                SyntaxProduction production = new LL1SyntaxProduction(head, body);
+                syntaxProductionList.add(production);
+            }
         }
         syntaxProductionList.forEach(System.out::println);
     }
@@ -185,26 +196,26 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
             for (SyntaxProduction production : syntaxProductionList) {
                 if (nullableSymbolSet.contains(production.getHead())) continue;
 
-                for (List<SyntaxSymbol> betaList : production.getBody()) {
-                    if (betaList.size() == 1 && betaList.get(0).isTerminal() && betaList.get(0).equals(epsSymbol)) {
-                        // 如果是空终结符
+                List<SyntaxSymbol> betaList = production.getBody();
+
+                // 如果只有空终结符
+                if (betaList.size() == 0) {
+                    nullableSymbolSet.add(production.getHead());
+                    hasNew = true;
+                    continue;
+                }
+
+                // 先判断是否都为非终结符
+                boolean hasTerminal = false;
+                for (SyntaxSymbol beta : betaList) {
+                    hasTerminal = beta.isTerminal();
+                    if (hasTerminal) break;
+                }
+                if (!hasTerminal) {
+                    if (nullableSymbolSet.containsAll(production.getBody())) {
+                        // 如果所有的终结符都是可能为空的.
                         hasNew = true;
                         nullableSymbolSet.add(production.getHead());
-                        continue;
-                    }
-
-                    boolean hasTerminal = false;
-                    for (SyntaxSymbol symbol : betaList) {
-                        hasTerminal = symbol.isTerminal();
-                        if (hasTerminal) break;
-                    }
-
-                    if (!hasTerminal) {
-                        if (nullableSymbolSet.containsAll(betaList)) {
-                            // 如果是非终结符, 并且所有的终结符都是可能为空的.
-                            hasNew = true;
-                            nullableSymbolSet.add(production.getHead());
-                        }
                     }
                 }
             }
@@ -213,7 +224,7 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
 
     private void computeFirstSet() {
         for (SyntaxProduction production : syntaxProductionList) {
-            firstSet.put(production.getHead(), new HashSet<>());
+            firstSetMap.put(production.getHead(), new HashSet<>());
         }
 
         boolean hasNew = true;
@@ -222,30 +233,89 @@ public class LL1SyntaxDefinition implements SyntaxDefinition {
 
             for (SyntaxProduction production : syntaxProductionList) {
                 SyntaxSymbol head = production.getHead();
-                for (List<SyntaxSymbol> betaList : production.getBody()) {
+                for (SyntaxSymbol beta : production.getBody()) {
                     // 停止的条件是遇到终结符或者不可能为空的非终结符.
-                    for (SyntaxSymbol symbol : betaList) {
-                        if (symbol.isTerminal()) {
-                            if (!firstSet.get(head).contains(symbol)) {
-                                hasNew = true;
-                                firstSet.get(head).add(symbol);
-                            }
-                            break;
-                        }
-
-                        if (!firstSet.get(head).containsAll(firstSet.get(symbol))) {
+                    if (beta.isTerminal()) {
+                        if (!firstSetMap.get(head).contains(beta)) {
                             hasNew = true;
-                            firstSet.get(head).addAll(firstSet.get(symbol));
+                            firstSetMap.get(head).add(beta);
                         }
-                        if (!nullableSymbolSet.contains(symbol)) break;
+                        break;
                     }
+
+                    // 如果是非终结符
+                    if (!firstSetMap.get(head).containsAll(firstSetMap.get(beta))) {
+                        hasNew = true;
+                        firstSetMap.get(head).addAll(firstSetMap.get(beta));
+                    }
+                    if (!nullableSymbolSet.contains(beta)) break;
                 }
             }
         }
     }
 
     private void computeFollowSet() {
+        for (SyntaxProduction production : syntaxProductionList) {
+            followSetMap.put(production.getHead(), new HashSet<>());
+        }
 
+        boolean hasNew = true;
+        while (hasNew) {
+            hasNew = false;
+
+            for (SyntaxProduction production : syntaxProductionList) {
+                Set<SyntaxSymbol> tmp = followSetMap.get(production.getHead());
+
+                List<SyntaxSymbol> betaList = production.getBody();
+                for (int i = betaList.size() - 1; i >= 0; i--) {
+                    // 逆序遍历
+                    SyntaxSymbol beta = betaList.get(i);
+
+                    // 终结符
+                    if (beta.isTerminal()) {
+                        tmp = new HashSet<>();
+                        tmp.add(beta);
+                        continue;
+                    }
+
+                    // 非终结符
+                    if (!followSetMap.get(beta).containsAll(tmp)) {
+                        followSetMap.get(beta).addAll(tmp);
+                        hasNew = true;
+                    }
+                    if (!nullableSymbolSet.contains(beta)) {
+                        tmp = firstSetMap.get(beta);
+                    } else {
+                        tmp.addAll(firstSetMap.get(beta));
+                    }
+                }
+            }
+        }
+    }
+
+    private void computeFirstSSet() {
+        for (SyntaxProduction production : syntaxProductionList) {
+            firstSSetMap.put(production, new HashSet<>());
+
+            computeOneFirstSSet(production);
+        }
+    }
+
+    private void computeOneFirstSSet(SyntaxProduction production) {
+        SyntaxSymbol head = production.getHead();
+        for (SyntaxSymbol beta : production.getBody()) {
+            // 如果是终结符
+            if (beta.isTerminal()) {
+                firstSSetMap.get(production).add(beta);
+                return;
+            }
+
+            // 如果是非终结符
+            firstSSetMap.get(production).addAll(firstSetMap.get(beta));
+            if (!nullableSymbolSet.contains(beta)) return;
+        }
+
+        firstSSetMap.get(production).addAll(followSetMap.get(head));
     }
 
     private static <T, E> boolean isSetMapAllEmpty(Map<T, Set<E>> map) {
