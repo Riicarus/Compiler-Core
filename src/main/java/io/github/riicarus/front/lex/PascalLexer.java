@@ -1,6 +1,7 @@
 package io.github.riicarus.front.lex;
 
 import io.github.riicarus.common.data.Token;
+import io.github.riicarus.common.util.CharUtil;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -65,6 +66,7 @@ public class PascalLexer implements Lexer {
         }
 
         tokenList.add(new Token(PascalLexicalSymbol.EOF, "EOF", line));
+        tokenList.add(new Token(PascalLexicalSymbol.LEX_END, String.valueOf(CharUtil.LEX_SYNTAX_END),line));
 
         return tokenList;
     }
@@ -87,4 +89,8 @@ public class PascalLexer implements Lexer {
         return token;
     }
 
+    @Override
+    public Set<LexicalSymbol> getAssistantLexSymbolSet() {
+        return PascalLexicalSymbol.assistantLexSymbols();
+    }
 }

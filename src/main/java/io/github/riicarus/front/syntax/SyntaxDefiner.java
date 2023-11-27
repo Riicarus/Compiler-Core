@@ -11,14 +11,7 @@ import java.util.Set;
  * @create 2023-11-23 15:09
  * @since 1.0.0
  */
-public interface SyntaxDefinition {
-
-    /**
-     * 加载定义的文法.
-     *
-     * @param path 文法定义文件的路径
-     */
-    void loadFrom(String path);
+public interface SyntaxDefiner {
 
     /**
      * 加载定义的文法.
@@ -53,4 +46,17 @@ public interface SyntaxDefinition {
      */
     SyntaxSymbol getStartSymbol();
 
+    /**
+     * 获取文法的结束符号.
+     *
+     * @return 文法的结束符号
+     */
+    SyntaxSymbol getEndSymbol();
+
+    /**
+     * 获取文法的空串符号.
+     *
+     * @return 文法的空串符号
+     */
+    SyntaxSymbol getEpsilonSymbol();
 }

@@ -110,7 +110,7 @@ public class CharUtil {
             PASCAL_CHAR_SET.add((char) i);
         }
 
-        PASCAL_CHAR_SET.addAll(List.of('*', '-', '(', ')', '\n', '\r', ' ', (char) 26));
+        PASCAL_CHAR_SET.addAll(List.of('*', '-', '(', ')', '\n', '\r', ' ', (char) 26, CharUtil.LEX_SYNTAX_END));
         PASCAL_CHAR_SET.addAll(REGEX_ESCAPE_CHAR_MAP.values());
     }
 
@@ -133,6 +133,7 @@ public class CharUtil {
     public static final char COLON_ESCAPED = (char) 135;
     public static final char VERTICAL_LINE_ESCAPED = (char) 136;
     public static final char PERCENTAGE_ESCAPED = (char) 137;
+    public static final char LEX_SYNTAX_END = (char) 138;
 
     private static final Map<Character, Character> SYNTAX_ESCAPE_CHAR_MAP = Map.of(
             COLON, COLON_ESCAPED,

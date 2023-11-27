@@ -1,6 +1,7 @@
+import io.github.riicarus.front.lex.Lexer;
 import io.github.riicarus.front.lex.PascalLexer;
 import io.github.riicarus.front.syntax.Syntaxer;
-import io.github.riicarus.front.syntax.ll1.LL1SyntaxDefinition;
+import io.github.riicarus.front.syntax.ll1.LL1SyntaxFileDefiner;
 import io.github.riicarus.front.syntax.ll1.LL1Syntaxer;
 import org.junit.Test;
 
@@ -14,7 +15,7 @@ public class LL1SyntaxTest {
     @Test
     public void testLL1SyntaxDefineLoad() {
         try {
-            new LL1SyntaxDefinition().loadFrom("D:/tmp/compiler/program.syn");
+            new LL1SyntaxFileDefiner("D:/tmp/compiler/program_lcf.syn");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -23,13 +24,13 @@ public class LL1SyntaxTest {
     @Test
     public void testLL1SyntaxWithLeftRecursion() {
         try {
-            new LL1SyntaxDefinition().loadFrom("D:/tmp/compiler/program_lr.syn");
+            new LL1SyntaxFileDefiner("D:/tmp/compiler/program_lcf.syn");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
-            new LL1SyntaxDefinition().loadFrom("D:/tmp/compiler/program_lr_s.syn");
+            new LL1SyntaxFileDefiner("D:/tmp/compiler/program_lcf.syn");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -38,13 +39,13 @@ public class LL1SyntaxTest {
     @Test
     public void testLL1SyntaxWithLeftCommonFactor() {
         try {
-            new LL1SyntaxDefinition().loadFrom("D:/tmp/compiler/program_lcf.syn");
+            new LL1SyntaxFileDefiner("D:/tmp/compiler/program_lcf.syn");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
-            new LL1SyntaxDefinition().loadFrom("D:/tmp/compiler/program_lcf_s.syn");
+            new LL1SyntaxFileDefiner("D:/tmp/compiler/program_lcf_s.syn");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -52,7 +53,8 @@ public class LL1SyntaxTest {
 
     @Test
     public void testLL1SyntaxParse() {
-        Syntaxer syntaxer = new LL1Syntaxer();
-        syntaxer.parse(new PascalLexer().parse("3 - 4 * 5".toCharArray()), "D:/tmp/compiler", "program", "syn", "dys");
+        Syntaxer syntaxer = new LL1Syntaxer(new LL1SyntaxFileDefiner("D:/tmp/compiler/program.syn"));
+        Lexer lexer = new PascalLexer();
+        syntaxer.parse(lexer.parse("3 - 4 * 5 - 7 * 8 - 0 ".toCharArray()), lexer.getAssistantLexSymbolSet());
     }
 }

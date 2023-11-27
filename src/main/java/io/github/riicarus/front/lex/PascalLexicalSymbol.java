@@ -4,6 +4,8 @@ import io.github.riicarus.common.data.Token;
 import io.github.riicarus.common.util.CharUtil;
 import io.github.riicarus.common.util.RegexParser;
 
+import java.util.Set;
+
 /**
  * 类 Pascal 语言单词符号.
  *
@@ -30,7 +32,8 @@ public enum PascalLexicalSymbol implements LexicalSymbol {
     L_PAREN("(", 21, "\\("), R_PAREN(")", 22, "\\)"),
     SEMICOLON(";", 23, ";"),
     EMPTY_SPACE(" ", 24, "( )( )*"),
-    EOL("EOL", 25, "(\r)*\n"), EOF("EOF", 26, String.valueOf((char) 26));
+    EOL("EOL", 25, "(\r)*\n"), EOF("EOF", 26, String.valueOf((char) 26)),
+    LEX_END(String.valueOf(CharUtil.LEX_SYNTAX_END), 27, String.valueOf(CharUtil.LEX_SYNTAX_END));
 
     private final String name;
 
@@ -84,5 +87,9 @@ public enum PascalLexicalSymbol implements LexicalSymbol {
     }
 
     public static void avoidLazyLoad() {
+    }
+
+    public static Set<LexicalSymbol> assistantLexSymbols() {
+        return Set.of(EMPTY_SPACE, EOL, EOF);
     }
 }

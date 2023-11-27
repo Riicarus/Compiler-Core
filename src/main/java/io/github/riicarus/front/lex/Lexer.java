@@ -3,6 +3,7 @@ package io.github.riicarus.front.lex;
 import io.github.riicarus.common.data.Token;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 词法解析器接口.
@@ -21,5 +22,12 @@ public interface Lexer {
      * @return 词法符号列表
      */
     List<Token> parse(char[] input);
+
+    /**
+     * 获取辅助词法符号集合
+     *
+     * @return 辅助词法符号集合
+     */
+    Set<LexicalSymbol> getAssistantLexSymbolSet();
 
 }
