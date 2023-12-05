@@ -21,7 +21,7 @@ public class LL1SyntaxFileDefiner extends LL1SyntaxDefiner {
     private final String syntaxFilePath;
     private SyntaxSymbol epsSymbol;
     private SyntaxSymbol startSymbol;
-    private final SyntaxSymbol END_SYMBOL = new LL1SyntaxSymbol(String.valueOf(CharUtil.LEX_SYNTAX_END), true);
+    private static final SyntaxSymbol END_SYMBOL = new LL1SyntaxSymbol(String.valueOf(CharUtil.LEX_SYNTAX_END), true);
 
     private final List<String> syntaxStringList = new ArrayList<>();
     private final Map<String, SyntaxSymbol> syntaxSymbolMap = new HashMap<>();
