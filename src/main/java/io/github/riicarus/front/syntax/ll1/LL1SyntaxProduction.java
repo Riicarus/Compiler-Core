@@ -3,7 +3,10 @@ package io.github.riicarus.front.syntax.ll1;
 import io.github.riicarus.front.syntax.SyntaxProduction;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * LL1 文法产生式.
@@ -18,6 +21,12 @@ public class LL1SyntaxProduction implements SyntaxProduction {
     private final List<SyntaxSymbol> body = new ArrayList<>();
 
     public LL1SyntaxProduction(SyntaxSymbol head, List<SyntaxSymbol> body) {
+        if (head == null)
+            throw new IllegalArgumentException("LL1 syntax production build failed: production's head can not be null.");
+
+        if (body == null || body.isEmpty())
+            throw new IllegalArgumentException("LL1 syntax production build failed: production's body can not be null or empty.");
+
         this.head = head;
         this.body.addAll(body);
     }

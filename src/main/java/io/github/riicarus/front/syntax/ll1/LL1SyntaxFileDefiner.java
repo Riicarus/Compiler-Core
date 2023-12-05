@@ -109,6 +109,9 @@ public class LL1SyntaxFileDefiner extends LL1SyntaxDefiner {
             if (head == null) {
                 throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, can not find symbol: " + headBodyParts[0]);
             }
+            if (head.isTerminal()) {
+                throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, head symbol can not be terminal: " + headBodyParts[0]);
+            }
 
             for (SyntaxProduction production : syntaxProductionList) {
                 if (production.getHead().equals(head)) {
