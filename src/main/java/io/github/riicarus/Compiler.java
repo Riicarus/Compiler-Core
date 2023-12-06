@@ -49,7 +49,7 @@ public class Compiler {
             lines.forEach(l -> tokenList.addAll(lexer.parse(l.toCharArray())));
 
             StringBuilder dydSB = new StringBuilder();
-            tokenList.forEach(t -> dydSB.append(t).append('\n'));
+            tokenList.forEach(t -> dydSB.append(t.toFileString()).append('\n'));
             writer.write(dydSB.toString());
             writer.flush();
             System.out.println("Lexer parse finished, time used: " + (System.currentTimeMillis() - timestamp) + "ms");

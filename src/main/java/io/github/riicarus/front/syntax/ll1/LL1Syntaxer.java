@@ -51,14 +51,25 @@ public class LL1Syntaxer implements Syntaxer {
 
             SyntaxSymbol top = stack.peek();
 
-            if (top.equals(definition.getEndSymbol()))  break;
-            else if (tokenIdx == tokens.size()) {
-                throw new IllegalStateException("LL1Syntax wrong: syntax not complete, want: \"" + top + "\" but get null.");
+            Token token;
+
+            // 处理结束符号, 栈顶为结束符号
+            if (top.equals(definition.getEndSymbol())) {
+                if (tokenIdx >= tokens.size())  // 如果 tokens 已经遍历完, 报错
+                    throw new IllegalStateException("LL1Syntax wrong: syntax not complete, want: \"" + top + "\" but get null.");
+                else {
+                    token = tokens.get(tokenIdx);
+                    if (token.getSymbol().getName().equals(definition.getEndSymbol().getName())) {  // 如果 tokens 也是结束符号, 就直接消去
+                        stack.pop();
+                        continue;
+                    } else    // 否则报错
+                        throw new IllegalStateException("LL1Syntax wrong: syntax complete, but get \"" + top + "\".");
+                }
             }
 
-            Token token = tokens.get(tokenIdx);
+            token = tokens.get(tokenIdx);
 
-            System.out.println(token.getSymbol().getName());
+            System.out.println(token);
 
             if (top.isTerminal()) {
                 if (top.equals(definition.getEpsilonSymbol())) {    // 空串直接弹出
@@ -90,6 +101,8 @@ public class LL1Syntaxer implements Syntaxer {
                         });
             }
         }
+
+        System.out.println(stack);
     }
 
     private void handleAssistantLexSymbols(Set<LexicalSymbol> assistantLexSymbolSet) {

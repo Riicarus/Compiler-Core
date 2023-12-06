@@ -53,6 +53,10 @@ public class Token {
 
     @Override
     public String toString() {
+        return "< " + symbol.getName() + "(" + symbol.getCode() + "), " + lexeme + ", " + line + " >";
+    }
+
+    public String toFileString() {
         return "<" + symbol.getCode() + ", " + (symbol.needPrintVal() ? lexeme : "_") + ">";
     }
 
