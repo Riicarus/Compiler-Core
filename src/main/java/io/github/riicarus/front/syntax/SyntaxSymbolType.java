@@ -9,6 +9,11 @@ package io.github.riicarus.front.syntax;
  */
 public enum SyntaxSymbolType {
 
-    TERMINAL, NON_TERMINAL
+    // 终结符对应的类型
+    OP, VALUE, CTRL, ACT,
+    // 辅助类型
+    ASST,
+    // 非终结符的类型
+    EXPR
 
 }

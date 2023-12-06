@@ -3,6 +3,7 @@ package io.github.riicarus.front.syntax.ll1;
 import io.github.riicarus.common.util.CharUtil;
 import io.github.riicarus.front.syntax.SyntaxProduction;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
+import io.github.riicarus.front.syntax.SyntaxSymbolType;
 
 import java.util.*;
 
@@ -15,7 +16,7 @@ import java.util.*;
  */
 public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
 
-    private static final SyntaxSymbol END_SYMBOL = new LL1SyntaxSymbol(String.valueOf(CharUtil.LEX_SYNTAX_END), true);
+    private static final SyntaxSymbol END_SYMBOL = new LL1SyntaxSymbol(String.valueOf(CharUtil.LEX_SYNTAX_END), true, SyntaxSymbolType.ASST);
 
     private final SyntaxSymbol epsSymbol;
     private final SyntaxSymbol endSymbol;
@@ -42,12 +43,12 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
         syntaxSymbolMap.put(startSymbol.getName(), startSymbol);
     }
 
-    public void addTerminalSymbols(Set<String> terminalSymbolList) {
-        terminalSymbolList.forEach(s -> syntaxSymbolMap.put(s, new LL1SyntaxSymbol(s, true)));
+    public void addTerminalSymbols(Map<String, SyntaxSymbolType> terminalSymbolMap) {
+        terminalSymbolMap.forEach((s, t) -> syntaxSymbolMap.put(s, new LL1SyntaxSymbol(s, true, t)));
     }
 
     public void addNonterminalSymbols(Set<String> nonterminalSymbolList) {
-        nonterminalSymbolList.forEach(s -> syntaxSymbolMap.put(s, new LL1SyntaxSymbol(s, false)));
+        nonterminalSymbolList.forEach(s -> syntaxSymbolMap.put(s, new LL1SyntaxSymbol(s, false, SyntaxSymbolType.EXPR)));
     }
 
     public void addProduction(String head, List<String> body) {

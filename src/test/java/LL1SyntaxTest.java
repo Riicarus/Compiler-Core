@@ -1,11 +1,13 @@
 import io.github.riicarus.front.lex.Lexer;
 import io.github.riicarus.front.lex.PascalLexer;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
+import io.github.riicarus.front.syntax.SyntaxSymbolType;
 import io.github.riicarus.front.syntax.Syntaxer;
 import io.github.riicarus.front.syntax.ll1.*;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -63,13 +65,15 @@ public class LL1SyntaxTest {
 
     @Test
     public void testLL1SyntaxInlineDefinerParse() {
-        SyntaxSymbol startSymbol = new LL1SyntaxSymbol("E", false);
+        SyntaxSymbol startSymbol = new LL1SyntaxSymbol("E", false, SyntaxSymbolType.EXPR);
+        LL1SyntaxSymbol epsSymbol = new LL1SyntaxSymbol("eps", true, SyntaxSymbolType.ASST);
+        final LL1SyntaxInlineDefiner definer = new LL1SyntaxInlineDefiner(epsSymbol, startSymbol);
 
-        final LL1SyntaxInlineDefiner definer = new LL1SyntaxInlineDefiner(
-                new LL1SyntaxSymbol("eps", true),
-                startSymbol
-        );
-        definer.addTerminalSymbols(Set.of("eps", "*", "-", "constant"));
+        definer.addTerminalSymbols(Map.of(
+                "eps", epsSymbol.getType(),
+                "*", SyntaxSymbolType.OP,
+                "-", SyntaxSymbolType.OP,
+                "constant", SyntaxSymbolType.VALUE));
         definer.addNonterminalSymbols(Set.of("E", "E'", "T", "T'", "F"));
 
         definer.addProduction("E", List.of("T", "E'"));

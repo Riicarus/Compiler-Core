@@ -3,6 +3,7 @@ package io.github.riicarus.front.syntax.ll1;
 import io.github.riicarus.common.util.CharUtil;
 import io.github.riicarus.front.syntax.SyntaxProduction;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
+import io.github.riicarus.front.syntax.SyntaxSymbolType;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -21,7 +22,7 @@ public class LL1SyntaxFileDefiner extends LL1SyntaxDefiner {
     private final String syntaxFilePath;
     private SyntaxSymbol epsSymbol;
     private SyntaxSymbol startSymbol;
-    private static final SyntaxSymbol END_SYMBOL = new LL1SyntaxSymbol(String.valueOf(CharUtil.LEX_SYNTAX_END), true);
+    private static final SyntaxSymbol END_SYMBOL = new LL1SyntaxSymbol(String.valueOf(CharUtil.LEX_SYNTAX_END), true, SyntaxSymbolType.ASST);
 
     private final List<String> syntaxStringList = new ArrayList<>();
     private final Map<String, SyntaxSymbol> syntaxSymbolMap = new HashMap<>();
@@ -49,17 +50,17 @@ public class LL1SyntaxFileDefiner extends LL1SyntaxDefiner {
             if (eps == null || eps.isEmpty()) {
                 throw new IllegalStateException("Load LL1Syntax definition failed: Syntax definition error: You must define a \"epsilon\" symbol in the first line.");
             }
-            epsSymbol = new LL1SyntaxSymbol(handleEscapeBack(handleEscape(eps)), true);
+            epsSymbol = new LL1SyntaxSymbol(handleEscapeBack(handleEscape(eps)), true, SyntaxSymbolType.VALUE);
             terminalSymbolSet.add(epsSymbol);
 
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty() && !line.equals(CharUtil.SYNTAX_SEPARATOR)) {
-                terminalSymbolSet.add(new LL1SyntaxSymbol(handleEscapeBack(handleEscape(line)), true));
+                terminalSymbolSet.add(new LL1SyntaxSymbol(handleEscapeBack(handleEscape(line)), true, SyntaxSymbolType.VALUE));
             }
 
             int ithNonterminal = 0;
             while ((line = reader.readLine()) != null && !line.isEmpty() && !line.equals(CharUtil.SYNTAX_SEPARATOR)) {
-                final LL1SyntaxSymbol symbol = new LL1SyntaxSymbol(handleEscapeBack(handleEscape(line)), false);
+                final LL1SyntaxSymbol symbol = new LL1SyntaxSymbol(handleEscapeBack(handleEscape(line)), false, SyntaxSymbolType.CTRL);
 
                 // 文法符号定义区域中的第一个符号需要为开始符号.
                 if (ithNonterminal == 0) {

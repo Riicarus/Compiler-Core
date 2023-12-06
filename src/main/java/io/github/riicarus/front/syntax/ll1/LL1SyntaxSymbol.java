@@ -15,12 +15,13 @@ import java.util.Objects;
 public class LL1SyntaxSymbol implements SyntaxSymbol {
 
     private final String name;
-
     private final SyntaxSymbolType type;
+    private final boolean isTerminal;
 
-    public LL1SyntaxSymbol(String name, boolean isTerminal) {
+    public LL1SyntaxSymbol(String name, boolean isTerminal, SyntaxSymbolType type) {
         this.name = name;
-        this.type = isTerminal ? SyntaxSymbolType.TERMINAL : SyntaxSymbolType.NON_TERMINAL;
+        this.isTerminal = isTerminal;
+        this.type = type;
     }
 
     @Override
@@ -35,7 +36,7 @@ public class LL1SyntaxSymbol implements SyntaxSymbol {
 
     @Override
     public boolean isTerminal() {
-        return SyntaxSymbolType.TERMINAL.equals(type);
+        return isTerminal;
     }
 
     @Override
@@ -53,6 +54,6 @@ public class LL1SyntaxSymbol implements SyntaxSymbol {
 
     @Override
     public String toString() {
-        return name + "(" + type + ")";
+        return name + "(" + type + ", " + isTerminal + ")";
     }
 }
