@@ -24,6 +24,12 @@ public class LL1SyntaxSymbol implements SyntaxSymbol {
         this.type = type;
     }
 
+    public LL1SyntaxSymbol(String name, SyntaxSymbolType type) {
+        this.name = name;
+        this.isTerminal = false;
+        this.type = type;
+    }
+
     @Override
     public String getName() {
         return name;

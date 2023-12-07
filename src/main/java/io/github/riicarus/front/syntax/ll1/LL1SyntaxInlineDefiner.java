@@ -48,7 +48,7 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
     }
 
     public void addNonterminalSymbols(Set<String> nonterminalSymbolList) {
-        nonterminalSymbolList.forEach(s -> syntaxSymbolMap.put(s, new LL1SyntaxSymbol(s, false, SyntaxSymbolType.EXPR)));
+        nonterminalSymbolList.forEach(s -> syntaxSymbolMap.put(s, new LL1SyntaxSymbol(s, SyntaxSymbolType.EXPR)));
     }
 
     public void addProduction(String head, List<String> body) {
