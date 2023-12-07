@@ -1,7 +1,6 @@
 package io.github.riicarus.front.lex;
 
 import io.github.riicarus.common.util.CharUtil;
-import io.github.riicarus.front.lex.NFA;
 
 import java.util.Set;
 import java.util.Stack;
