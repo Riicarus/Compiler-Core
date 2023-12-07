@@ -1,5 +1,5 @@
 import io.github.riicarus.common.util.CharUtil;
-import io.github.riicarus.common.util.RegexParser;
+import io.github.riicarus.front.lex.RegexParser;
 import io.github.riicarus.front.lex.NfaEdge;
 import io.github.riicarus.front.lex.NFA;
 import org.junit.Test;
