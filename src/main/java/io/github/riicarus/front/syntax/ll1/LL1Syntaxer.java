@@ -2,6 +2,7 @@ package io.github.riicarus.front.syntax.ll1;
 
 import io.github.riicarus.common.data.AbstractAST;
 import io.github.riicarus.common.data.AstConstructStrategy;
+import io.github.riicarus.common.data.SyntaxParseResult;
 import io.github.riicarus.common.data.Token;
 import io.github.riicarus.front.lex.LexicalSymbol;
 import io.github.riicarus.front.syntax.*;
@@ -43,7 +44,7 @@ public class LL1Syntaxer implements Syntaxer {
     }
 
     @Override
-    public AbstractAST<?> parse(List<Token> tokenList, Set<LexicalSymbol> assistSet, AstConstructStrategy strategy) {
+    public SyntaxParseResult parse(List<Token> tokenList, Set<LexicalSymbol> assistSet, AstConstructStrategy strategy) {
         if (!reset(tokenList, assistSet, strategy))
             throw new IllegalStateException("LL1Syntax wrong: token list is null.");
 
@@ -59,7 +60,7 @@ public class LL1Syntaxer implements Syntaxer {
         if (astStack.size() != 1)
             throw new IllegalStateException("LL1Syntax wrong: not expected: ast stack's remaining size is not 1.");
 
-        return astStack.pop();
+        return new SyntaxParseResult(astStack.pop());
     }
 
     @SuppressWarnings("all") // 抑制空 while 循环
@@ -162,14 +163,17 @@ public class LL1Syntaxer implements Syntaxer {
                 int pTop = definition.getOpPrecedenceMap().get(topSymbol);
                 int pTopOp;
 
+                // 如果符号栈栈顶的符号的优先级比当前分析符号的优先级高, 先处理符号栈栈顶的符号
                 for (
                         topOp = opSymbolStack.peek(), pTopOp = definition.getOpPrecedenceMap().get(topOp);
-                        pTopOp > pTop;
+                        pTopOp >= pTop;
                         topOp = opSymbolStack.peek(), pTopOp = definition.getOpPrecedenceMap().get(topOp)
                 ) {
                     opSymbolStack.pop();
                     AbstractAST<?> ast = topOp.constructAST(astConstructStrategy, topOp.getName(), astStack, opSymbolStack);
                     if (ast != null) astStack.push(ast);
+
+                    if (opSymbolStack.isEmpty()) break;
                 }
             }
 
@@ -181,6 +185,9 @@ public class LL1Syntaxer implements Syntaxer {
         }
     }
 
+    /**
+     * 此时所有的 SyntaxSymbol 都被检查了一一遍, 要么被压入符号栈中, 要么被构建成为了 AST.
+     */
     private void handlePostProcessAstConstruction() {
         while (!opSymbolStack.isEmpty()) {
             SyntaxSymbol<?> op = opSymbolStack.pop();

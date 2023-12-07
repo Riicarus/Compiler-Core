@@ -19,5 +19,7 @@ public abstract class AbstractAST<T> {
         return type;
     }
 
+    public abstract T execute();
+
     public abstract String toTreeString(int level);
 }
