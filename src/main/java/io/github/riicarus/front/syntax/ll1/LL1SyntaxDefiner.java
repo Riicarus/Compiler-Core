@@ -1,6 +1,5 @@
 package io.github.riicarus.front.syntax.ll1;
 
-import io.github.riicarus.common.data.AstConstructStrategy;
 import io.github.riicarus.front.syntax.SyntaxDefiner;
 import io.github.riicarus.front.syntax.SyntaxProduction;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
