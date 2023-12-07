@@ -1,11 +1,10 @@
 package io.github.riicarus.front.syntax.ll1;
 
+import io.github.riicarus.common.data.AbstractAST;
+import io.github.riicarus.common.data.AstConstructStrategy;
 import io.github.riicarus.common.data.Token;
 import io.github.riicarus.front.lex.LexicalSymbol;
-import io.github.riicarus.front.syntax.SyntaxDefiner;
-import io.github.riicarus.front.syntax.SyntaxProduction;
-import io.github.riicarus.front.syntax.SyntaxSymbol;
-import io.github.riicarus.front.syntax.Syntaxer;
+import io.github.riicarus.front.syntax.*;
 
 import java.util.*;
 
@@ -19,11 +18,11 @@ import java.util.*;
 public class LL1Syntaxer implements Syntaxer {
 
     private final SyntaxDefiner definition;
-    private final Map<SyntaxSymbol, Map<String, Set<SyntaxProduction>>> analyzeMap;
+    private final Map<SyntaxSymbol<?>, Map<String, Set<SyntaxProduction>>> analyzeMap = new HashMap<>();
 
     // 分析栈
-    private final Stack<SyntaxSymbol> stack = new Stack<>();
-    private SyntaxSymbol topSymbol;
+    private final Stack<SyntaxSymbol<?>> syntaxStack = new Stack<>();
+    private SyntaxSymbol<?> topSymbol;
 
     private int tokenIdx;
     private Token curToken;
@@ -31,29 +30,36 @@ public class LL1Syntaxer implements Syntaxer {
 
     private final Set<LexicalSymbol> assistantLexSymbolSet = new HashSet<>();
 
+    private AstConstructStrategy astConstructStrategy;
+    private final Stack<AbstractAST<?>> astStack = new Stack<>();
+    private final Stack<SyntaxSymbol<?>> opSymbolStack = new Stack<>();
+
     public LL1Syntaxer(SyntaxDefiner definition) {
         this.definition = definition;
-        this.analyzeMap = definition.getAnalyzeMap();
 
         definition.load();
+        this.analyzeMap.clear();
+        this.analyzeMap.putAll(definition.getAnalyzeMap());
     }
 
     @Override
-    public void parse(List<Token> tokenList, Set<LexicalSymbol> assistSet) {
-        if (!reset(tokenList, assistSet))
+    public AbstractAST<?> parse(List<Token> tokenList, Set<LexicalSymbol> assistSet, AstConstructStrategy strategy) {
+        if (!reset(tokenList, assistSet, strategy))
             throw new IllegalStateException("LL1Syntax wrong: token list is null.");
 
-        while (!stack.isEmpty() && !checkEnds()) {  // 如果分析栈不空, 并且没有遇到结束符
-            System.out.println(stack);
-            System.out.println(curToken);
-
+        while (!syntaxStack.isEmpty() && !checkEnds()) {  // 如果分析栈不空, 并且没有遇到结束符
             if (topSymbol.isTerminal())
                 handleTerminal();
             else
                 handleNonterminal();
         }
 
-        System.out.println(stack);
+        handlePostProcessAstConstruction();
+
+        if (astStack.size() != 1)
+            throw new IllegalStateException("LL1Syntax wrong: not expected: ast stack's remaining size is not 1.");
+
+        return astStack.pop();
     }
 
     @SuppressWarnings("all") // 抑制空 while 循环
@@ -71,7 +77,7 @@ public class LL1Syntaxer implements Syntaxer {
         return false;
     }
 
-    private boolean reset(List<Token> tokenList, Set<LexicalSymbol> assistSet) {
+    private boolean reset(List<Token> tokenList, Set<LexicalSymbol> assistSet, AstConstructStrategy strategy) {
         tokenIdx = -1;
         curToken = null;
         topSymbol = null;
@@ -84,22 +90,27 @@ public class LL1Syntaxer implements Syntaxer {
         assistantLexSymbolSet.clear();
         assistantLexSymbolSet.addAll(assistSet);
 
-        stack.clear();
-        stack.push(definition.getEndSymbol());
-        stack.push(definition.getStartSymbol());
+        astConstructStrategy = strategy;
+
+        syntaxStack.clear();
+        syntaxStack.push(definition.getEndSymbol());
+        syntaxStack.push(definition.getStartSymbol());
+
+        astStack.clear();
+        opSymbolStack.clear();
 
         return true;
     }
 
     private boolean checkEnds() {
-        topSymbol = stack.peek();
+        topSymbol = syntaxStack.peek();
 
         if (topSymbol.equals(definition.getEndSymbol())) {
             if (tokenIdx >= tokens.size())  // 如果 tokens 已经遍历完, 报错
                 throw new IllegalStateException("LL1Syntax wrong: syntax not complete, want: \"" + topSymbol + "\" but get null.");
             else {
                 if (curToken.getSymbol().getName().equals(definition.getEndSymbol().getName())) {  // 如果 tokens 也是结束符号, 就直接消去
-                    stack.pop();
+                    syntaxStack.pop();
                     return true;
                 } else    // 否则报错
                     throw new IllegalStateException("LL1Syntax wrong: syntax complete, but get \"" + topSymbol + "\".");
@@ -111,9 +122,10 @@ public class LL1Syntaxer implements Syntaxer {
 
     private void handleTerminal() {
         if (topSymbol.equals(definition.getEpsilonSymbol())) {    // 空串直接弹出
-            stack.pop();
+            syntaxStack.pop();
         } else if (topSymbol.getName().equals(curToken.getSymbol().getName())) { // 非空终结符弹出, 匹配下一个 token
-            stack.pop();
+            syntaxStack.pop();
+            handleInProcessAstConstruction(curToken);
             nextTokenWithAssitant();
         } else {    // 找不到对应的非终结符
             throw new IllegalStateException("LL1Syntax wrong: want : \"" + topSymbol.getName() + "\", get: \"" + curToken.getSymbol().getName() + "\"");
@@ -121,7 +133,8 @@ public class LL1Syntaxer implements Syntaxer {
     }
 
     private void handleNonterminal() {
-        stack.pop();
+        syntaxStack.pop();
+        // handleAstGeneration(curToken);
 
         Map<String, Set<SyntaxProduction>> setMap = analyzeMap.get(topSymbol);
         if (setMap == null || setMap.isEmpty())
@@ -135,8 +148,46 @@ public class LL1Syntaxer implements Syntaxer {
                 // 注意, LL1 文法中的 Set 实际上只会有一个产生式, 这里只循环一次.
                 p -> {
                     for (int j = p.getBody().size() - 1; j >= 0; j--) {
-                        stack.push(p.getBody().get(j));
+                        syntaxStack.push(p.getBody().get(j));
                     }
                 });
+    }
+
+    private void handleInProcessAstConstruction(Token token) {
+        if (topSymbol.equals(definition.getEndSymbol())) return;
+
+        if (topSymbol.getType().equals(SyntaxSymbolType.OP)) {
+            if (!opSymbolStack.isEmpty()) {
+                SyntaxSymbol<?> topOp;
+                int pTop = definition.getOpPrecedenceMap().get(topSymbol);
+                int pTopOp;
+
+                for (
+                        topOp = opSymbolStack.peek(), pTopOp = definition.getOpPrecedenceMap().get(topOp);
+                        pTopOp > pTop;
+                        topOp = opSymbolStack.peek(), pTopOp = definition.getOpPrecedenceMap().get(topOp)
+                ) {
+                    opSymbolStack.pop();
+                    AbstractAST<?> ast = topOp.constructAST(astConstructStrategy, topOp.getName(), astStack, opSymbolStack);
+                    if (ast != null) astStack.push(ast);
+                }
+            }
+
+            opSymbolStack.push(topSymbol);
+        } else {
+            AbstractAST<?> abstractAST = topSymbol.constructAST(astConstructStrategy, token.getLexeme(), astStack, opSymbolStack);
+            if (abstractAST == null) return;
+            astStack.push(abstractAST);
+        }
+    }
+
+    private void handlePostProcessAstConstruction() {
+        while (!opSymbolStack.isEmpty()) {
+            SyntaxSymbol<?> op = opSymbolStack.pop();
+
+            AbstractAST<?> ast = op.constructAST(astConstructStrategy, op.getName(), astStack, opSymbolStack);
+            if (ast == null) continue;
+            astStack.push(ast);
+        }
     }
 }

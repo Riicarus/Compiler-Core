@@ -1,9 +1,13 @@
 package io.github.riicarus.front.syntax;
 
+import io.github.riicarus.common.data.AbstractAST;
+import io.github.riicarus.common.data.AstConstructStrategy;
+import io.github.riicarus.common.data.AstConstructor;
 import io.github.riicarus.common.data.Token;
 import io.github.riicarus.front.lex.LexicalSymbol;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -20,7 +24,9 @@ public interface Syntaxer {
      *
      * @param tokenList 需要解析的词法符号列表
      * @param assistantLexSymbolSet 辅助词法符号集合
+     * @param strategy AST 构建策略工厂
+     * @return 分析完成后, 构建的好的抽象语法树
      */
-    void parse(List<Token> tokenList, Set<LexicalSymbol> assistantLexSymbolSet);
+    AbstractAST<?> parse(List<Token> tokenList, Set<LexicalSymbol> assistantLexSymbolSet, AstConstructStrategy strategy);
 
 }

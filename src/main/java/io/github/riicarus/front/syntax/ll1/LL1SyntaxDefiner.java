@@ -1,5 +1,6 @@
 package io.github.riicarus.front.syntax.ll1;
 
+import io.github.riicarus.common.data.AstConstructStrategy;
 import io.github.riicarus.front.syntax.SyntaxDefiner;
 import io.github.riicarus.front.syntax.SyntaxProduction;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
@@ -17,11 +18,11 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
 
     private List<SyntaxProduction> syntaxProductionList;
 
-    private final Set<SyntaxSymbol> nullableSymbolSet = new HashSet<>();
-    private final Map<SyntaxSymbol, Set<SyntaxSymbol>> firstSetMap = new HashMap<>();
-    private final Map<SyntaxSymbol, Set<SyntaxSymbol>> followSetMap = new HashMap<>();
-    private final Map<SyntaxProduction, Set<SyntaxSymbol>> selectSetMap = new HashMap<>();
-    private final Map<SyntaxSymbol, Map<String, Set<SyntaxProduction>>> LL1AnalyzeMap = new HashMap<>();
+    private final Set<SyntaxSymbol<?>> nullableSymbolSet = new HashSet<>();
+    private final Map<SyntaxSymbol<?>, Set<SyntaxSymbol<?>>> firstSetMap = new HashMap<>();
+    private final Map<SyntaxSymbol<?>, Set<SyntaxSymbol<?>>> followSetMap = new HashMap<>();
+    private final Map<SyntaxProduction, Set<SyntaxSymbol<?>>> selectSetMap = new HashMap<>();
+    private final Map<SyntaxSymbol<?>, Map<String, Set<SyntaxProduction>>> LL1AnalyzeMap = new HashMap<>();
 
     @Override
     public final void load() {
@@ -43,7 +44,7 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
             for (SyntaxProduction production : syntaxProductionList) {
                 if (nullableSymbolSet.contains(production.getHead())) continue;
 
-                List<SyntaxSymbol> betaList = production.getBody();
+                List<SyntaxSymbol<?>> betaList = production.getBody();
 
                 // 如果只有空终结符
                 if (betaList.size() == 1 && betaList.get(0).equals(getEpsilonSymbol())) {
@@ -54,7 +55,7 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
 
                 // 先判断是否都为非终结符
                 boolean hasTerminal = false;
-                for (SyntaxSymbol beta : betaList) {
+                for (SyntaxSymbol<?> beta : betaList) {
                     hasTerminal = beta.isTerminal();
                     if (hasTerminal) break;
                 }
@@ -82,9 +83,9 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
             hasNew = false;
 
             for (SyntaxProduction production : syntaxProductionList) {
-                SyntaxSymbol head = production.getHead();
+                SyntaxSymbol<?> head = production.getHead();
 
-                for (SyntaxSymbol beta : production.getBody()) {
+                for (SyntaxSymbol<?> beta : production.getBody()) {
                     // 如果终结符, 添加并停止遍历
                     if (beta.isTerminal()) {
                         hasNew |= firstSetMap.get(head).add(beta);
@@ -120,12 +121,12 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
             hasNew = false;
 
             for (SyntaxProduction production : syntaxProductionList) {
-                Set<SyntaxSymbol> tmp = new HashSet<>(followSetMap.get(production.getHead()));
+                Set<SyntaxSymbol<?>> tmp = new HashSet<>(followSetMap.get(production.getHead()));
 
-                List<SyntaxSymbol> betaList = production.getBody();
+                List<SyntaxSymbol<?>> betaList = production.getBody();
                 // 逆序遍历
                 for (int i = betaList.size() - 1; i >= 0; i--) {
-                    SyntaxSymbol beta = betaList.get(i);
+                    SyntaxSymbol<?> beta = betaList.get(i);
 
                     // 终结符
                     if (beta.isTerminal()) {
@@ -166,8 +167,8 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
     private void computeSelectSet(SyntaxProduction production) {
         if (production.getBody().isEmpty()) return;
 
-        SyntaxSymbol head = production.getHead();
-        for (SyntaxSymbol beta : production.getBody()) {
+        SyntaxSymbol<?> head = production.getHead();
+        for (SyntaxSymbol<?> beta : production.getBody()) {
             if (beta.equals(getEpsilonSymbol())) {   // 如果是空终结符
                 break;
             } else if (beta.isTerminal()) { // 如果是非空终结符
@@ -184,11 +185,11 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
     }
 
     private void computeLL1AnalyzeMap() {
-        for (Map.Entry<SyntaxProduction, Set<SyntaxSymbol>> entry : selectSetMap.entrySet()) {
+        for (Map.Entry<SyntaxProduction, Set<SyntaxSymbol<?>>> entry : selectSetMap.entrySet()) {
             SyntaxProduction production = entry.getKey();
 
-            SyntaxSymbol head = production.getHead();
-            for (SyntaxSymbol symbol : entry.getValue()) {
+            SyntaxSymbol<?> head = production.getHead();
+            for (SyntaxSymbol<?> symbol : entry.getValue()) {
                 LL1AnalyzeMap.putIfAbsent(head, new HashMap<>());
                 LL1AnalyzeMap.get(head).putIfAbsent(symbol.getName(), new HashSet<>());
 
@@ -205,7 +206,7 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
                 )
         );
 
-        for (Map.Entry<SyntaxSymbol, Map<String, Set<SyntaxProduction>>> entry : LL1AnalyzeMap.entrySet()) {
+        for (Map.Entry<SyntaxSymbol<?>, Map<String, Set<SyntaxProduction>>> entry : LL1AnalyzeMap.entrySet()) {
             for (Map.Entry<String, Set<SyntaxProduction>> innerEntry : entry.getValue().entrySet()) {
                 if (innerEntry.getValue().size() > 1) {
                     throw new IllegalStateException("LL1Syntax not support: " +
@@ -222,7 +223,7 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
     }
 
     @Override
-    public Map<SyntaxSymbol, Map<String, Set<SyntaxProduction>>> getAnalyzeMap() {
-        return LL1AnalyzeMap;
+    public Map<SyntaxSymbol<?>, Map<String, Set<SyntaxProduction>>> getAnalyzeMap() {
+        return new HashMap<>(LL1AnalyzeMap);
     }
 }

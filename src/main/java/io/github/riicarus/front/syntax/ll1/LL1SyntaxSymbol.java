@@ -12,7 +12,7 @@ import java.util.Objects;
  * @create 2023-11-22 22:24
  * @since 1.0.0
  */
-public class LL1SyntaxSymbol implements SyntaxSymbol {
+public class LL1SyntaxSymbol<T> implements SyntaxSymbol<T> {
 
     private final String name;
     private final SyntaxSymbolType type;
@@ -49,7 +49,7 @@ public class LL1SyntaxSymbol implements SyntaxSymbol {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        LL1SyntaxSymbol that = (LL1SyntaxSymbol) o;
+        LL1SyntaxSymbol<?> that = (LL1SyntaxSymbol<?>) o;
         return Objects.equals(name, that.name);
     }
 

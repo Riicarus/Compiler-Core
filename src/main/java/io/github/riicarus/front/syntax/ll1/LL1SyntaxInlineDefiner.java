@@ -1,5 +1,6 @@
 package io.github.riicarus.front.syntax.ll1;
 
+import io.github.riicarus.common.data.AstConstructStrategy;
 import io.github.riicarus.common.util.CharUtil;
 import io.github.riicarus.front.syntax.SyntaxProduction;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
@@ -16,43 +17,54 @@ import java.util.*;
  */
 public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
 
-    private static final SyntaxSymbol END_SYMBOL = new LL1SyntaxSymbol(String.valueOf(CharUtil.LEX_SYNTAX_END), true, SyntaxSymbolType.ASST);
-
-    private final SyntaxSymbol epsSymbol;
-    private final SyntaxSymbol endSymbol;
-    private final SyntaxSymbol startSymbol;
+    private static final SyntaxSymbol<?> END_SYMBOL = new LL1SyntaxSymbol<>(String.valueOf(CharUtil.LEX_SYNTAX_END), true, SyntaxSymbolType.ASST);
+    private final SyntaxSymbol<?> epsSymbol;
+    private final SyntaxSymbol<?> endSymbol;
+    private final SyntaxSymbol<?> startSymbol;
 
     private final List<SyntaxProduction> productionList = new ArrayList<>();
-    private final Map<String, SyntaxSymbol> syntaxSymbolMap = new HashMap<>();
+    private final Map<String, SyntaxSymbol<?>> syntaxSymbolMap = new HashMap<>();
 
-    public LL1SyntaxInlineDefiner(SyntaxSymbol epsSymbol, SyntaxSymbol endSymbol, SyntaxSymbol startSymbol) {
+    private final Map<SyntaxSymbol<?>, Integer> opPrecedenceMap = new HashMap<>();
+    private final AstConstructStrategy strategy;
+
+    public LL1SyntaxInlineDefiner(SyntaxSymbol<?> epsSymbol,
+                                  SyntaxSymbol<?> endSymbol,
+                                  SyntaxSymbol<?> startSymbol,
+                                  Map<SyntaxSymbol<?>, Integer> opPrecedenceMap,
+                                  AstConstructStrategy strategy) {
         this.epsSymbol = epsSymbol;
         this.endSymbol = endSymbol;
         this.startSymbol = startSymbol;
 
         syntaxSymbolMap.put(epsSymbol.getName(), epsSymbol);
         syntaxSymbolMap.put(startSymbol.getName(), startSymbol);
+
+        this.opPrecedenceMap.putAll(opPrecedenceMap);
+        this.strategy = strategy;
     }
 
-    public LL1SyntaxInlineDefiner(SyntaxSymbol epsSymbol, SyntaxSymbol startSymbol) {
+    public LL1SyntaxInlineDefiner(SyntaxSymbol<?> epsSymbol,
+                                  SyntaxSymbol<?> startSymbol,
+                                  Map<SyntaxSymbol<?>, Integer> opPrecedenceMap,
+                                  AstConstructStrategy strategy) {
         this.epsSymbol = epsSymbol;
         this.startSymbol = startSymbol;
         this.endSymbol = END_SYMBOL;
 
         syntaxSymbolMap.put(epsSymbol.getName(), epsSymbol);
         syntaxSymbolMap.put(startSymbol.getName(), startSymbol);
+
+        this.opPrecedenceMap.putAll(opPrecedenceMap);
+        this.strategy = strategy;
     }
 
-    public void addTerminalSymbols(Map<String, SyntaxSymbolType> terminalSymbolMap) {
-        terminalSymbolMap.forEach((s, t) -> syntaxSymbolMap.put(s, new LL1SyntaxSymbol(s, true, t)));
-    }
-
-    public void addNonterminalSymbols(Set<String> nonterminalSymbolList) {
-        nonterminalSymbolList.forEach(s -> syntaxSymbolMap.put(s, new LL1SyntaxSymbol(s, SyntaxSymbolType.EXPR)));
+    public void addSymbols(Set<SyntaxSymbol<?>> symbolList) {
+        symbolList.forEach(s -> syntaxSymbolMap.put(s.getName(), s));
     }
 
     public void addProduction(String head, List<String> body) {
-        final SyntaxSymbol headSymbol = syntaxSymbolMap.get(head);
+        final SyntaxSymbol<?> headSymbol = syntaxSymbolMap.get(head);
         if (headSymbol == null) {
             throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, can not find symbol: " + head);
         }
@@ -60,9 +72,9 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
             throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, head symbol can not be terminal: " + head);
         }
 
-        List<SyntaxSymbol> bodySymbolList = new ArrayList<>();
+        List<SyntaxSymbol<?>> bodySymbolList = new ArrayList<>();
         for (String s : body) {
-            final SyntaxSymbol bodySymbol = syntaxSymbolMap.get(s);
+            final SyntaxSymbol<?> bodySymbol = syntaxSymbolMap.get(s);
             if (bodySymbol == null) {
                 throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, can not find symbol: " + s);
             }
@@ -78,22 +90,32 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
     }
 
     @Override
-    public Set<SyntaxSymbol> getSyntaxSymbolSet() {
+    public Set<SyntaxSymbol<?>> getSyntaxSymbolSet() {
         return new HashSet<>(syntaxSymbolMap.values());
     }
 
     @Override
-    public SyntaxSymbol getStartSymbol() {
+    public SyntaxSymbol<?> getStartSymbol() {
         return startSymbol;
     }
 
     @Override
-    public SyntaxSymbol getEndSymbol() {
+    public SyntaxSymbol<?> getEndSymbol() {
         return endSymbol;
     }
 
     @Override
-    public SyntaxSymbol getEpsilonSymbol() {
+    public SyntaxSymbol<?> getEpsilonSymbol() {
         return epsSymbol;
+    }
+
+    @Override
+    public Map<SyntaxSymbol<?>, Integer> getOpPrecedenceMap() {
+        return opPrecedenceMap;
+    }
+
+    @Override
+    public AstConstructStrategy getAstConstructStrategy() {
+        return strategy;
     }
 }

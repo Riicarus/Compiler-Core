@@ -17,10 +17,10 @@ import java.util.Objects;
  */
 public class LL1SyntaxProduction implements SyntaxProduction {
 
-    private final SyntaxSymbol head;
-    private final List<SyntaxSymbol> body = new ArrayList<>();
+    private final SyntaxSymbol<?> head;
+    private final List<SyntaxSymbol<?>> body = new ArrayList<>();
 
-    public LL1SyntaxProduction(SyntaxSymbol head, List<SyntaxSymbol> body) {
+    public LL1SyntaxProduction(SyntaxSymbol<?> head, List<SyntaxSymbol<?>> body) {
         if (head == null)
             throw new IllegalArgumentException("LL1 syntax production build failed: production's head can not be null.");
 
@@ -32,12 +32,12 @@ public class LL1SyntaxProduction implements SyntaxProduction {
     }
 
     @Override
-    public SyntaxSymbol getHead() {
+    public SyntaxSymbol<?> getHead() {
         return head;
     }
 
     @Override
-    public List<SyntaxSymbol> getBody() {
+    public List<SyntaxSymbol<?>> getBody() {
         return Collections.unmodifiableList(body);
     }
 

@@ -16,13 +16,13 @@ public interface SyntaxProduction {
      *
      * @return 产生式头符号
      */
-    SyntaxSymbol getHead();
+    SyntaxSymbol<?> getHead();
 
     /**
      * 获取产生式体.
      *
      * @return 产生式体中的符号集合
      */
-    List<SyntaxSymbol> getBody();
+    List<SyntaxSymbol<?>> getBody();
 
 }

@@ -10,7 +10,7 @@ package io.github.riicarus.front.syntax;
 public enum SyntaxSymbolType {
 
     // 终结符对应的类型
-    OP, VALUE, CTRL, ACT,
+    OP, VAL,
     // 辅助类型
     ASST,
     // 非终结符的类型

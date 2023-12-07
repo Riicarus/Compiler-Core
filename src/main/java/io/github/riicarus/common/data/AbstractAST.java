@@ -9,6 +9,15 @@ package io.github.riicarus.common.data;
  */
 public abstract class AbstractAST<T> {
 
-    public abstract T compute();
+    protected final AstType type;
 
+    public AbstractAST(AstType type) {
+        this.type = type;
+    }
+
+    public AstType getType() {
+        return type;
+    }
+
+    public abstract String toTreeString(int level);
 }
