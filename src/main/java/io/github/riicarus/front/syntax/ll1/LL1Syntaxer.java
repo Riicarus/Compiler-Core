@@ -64,7 +64,7 @@ public class LL1Syntaxer implements Syntaxer {
     }
 
     @SuppressWarnings("all") // 抑制空 while 循环
-    private void nextTokenWithAssitant() {
+    private void nextTokenIgnoreAssitant() {
         while (nextToken() && assistantLexSymbolSet.contains(tokens.get(tokenIdx).getSymbol())) ;
     }
 
@@ -103,6 +103,11 @@ public class LL1Syntaxer implements Syntaxer {
         return true;
     }
 
+    /**
+     * 检查是否分析完成.
+     *
+     * @return true-分析完成; false-分析未完成
+     */
     private boolean checkEnds() {
         topSymbol = syntaxStack.peek();
 
@@ -121,18 +126,24 @@ public class LL1Syntaxer implements Syntaxer {
         return false;
     }
 
+    /**
+     * 处理终结符
+     */
     private void handleTerminal() {
         if (topSymbol.equals(definition.getEpsilonSymbol())) {    // 空串直接弹出
             syntaxStack.pop();
         } else if (topSymbol.getName().equals(curToken.getSymbol().getName())) { // 非空终结符弹出, 匹配下一个 token
             syntaxStack.pop();
             handleInProcessAstConstruction(curToken);
-            nextTokenWithAssitant();
+            nextTokenIgnoreAssitant();
         } else {    // 找不到对应的非终结符
             throw new IllegalStateException("LL1Syntax wrong: want : \"" + topSymbol.getName() + "\", get: \"" + curToken.getSymbol().getName() + "\"");
         }
     }
 
+    /**
+     * 处理非终结符
+     */
     private void handleNonterminal() {
         syntaxStack.pop();
         // handleAstGeneration(curToken);
@@ -154,6 +165,16 @@ public class LL1Syntaxer implements Syntaxer {
                 });
     }
 
+    /**
+     * 处理 token 没有被完全遍历的情况.
+     * <p>将文法符号类型为 OP 的符号放入符号栈中</p>
+     * <p>如果符号栈栈顶符号的优先级不低于当前分析到的符号,</p>
+     * <p>那么就优先处理符号栈栈顶的符号, 直到栈顶符号优先级低于当前分析的符号.</p>
+     * <br/>
+     * <p>用符号优先级的方式来保证执行的优先级顺序.</p>
+     *
+     * @param token 当前被分析的 token
+     */
     private void handleInProcessAstConstruction(Token token) {
         if (topSymbol.equals(definition.getEndSymbol())) return;
 
