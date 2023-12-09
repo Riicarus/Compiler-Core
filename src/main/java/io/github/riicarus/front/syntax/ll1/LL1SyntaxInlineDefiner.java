@@ -139,6 +139,7 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
         Set<SyntaxProduction> startProductionSet = productionMap.get(startSymbol);
         computeOpPrecedence(startProductionSet, 0, opPreMap);
 
+        System.out.println("OpPrecedence:");
         opPreMap.entrySet().forEach(System.out::println);
 
         return opPreMap;

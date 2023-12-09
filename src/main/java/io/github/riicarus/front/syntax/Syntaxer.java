@@ -17,9 +17,8 @@ import java.util.Set;
  */
 public interface Syntaxer {
 
-
     /**
-     * 根据文法分析输入的 token 串, 返回分析后生成的结果, 包括:<br/>
+     * 根据文法分析输出的 token 串, 返回分析后生成的结果, 包括:<br/>
      * <li>AST 树</li>
      * <li>变量名表</li>
      * <li>过程名表</li>
