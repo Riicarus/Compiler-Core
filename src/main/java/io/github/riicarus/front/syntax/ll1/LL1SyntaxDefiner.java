@@ -15,7 +15,7 @@ import java.util.*;
  */
 public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
 
-    private List<SyntaxProduction> syntaxProductionList;
+    private final List<SyntaxProduction> syntaxProductionList = new ArrayList<>();
 
     private final Set<SyntaxSymbol<?>> nullableSymbolSet = new HashSet<>();
     private final Map<SyntaxSymbol<?>, Set<SyntaxSymbol<?>>> firstSetMap = new HashMap<>();
@@ -25,7 +25,8 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
 
     @Override
     public final void load() {
-        syntaxProductionList = new ArrayList<>(loadSyntaxProductions());
+        syntaxProductionList.clear();
+        syntaxProductionList.addAll(loadSyntaxProductions());
 
         computeNullableSet();
         computeFirstSetMap();

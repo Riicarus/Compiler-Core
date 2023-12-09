@@ -22,25 +22,44 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
     private final SyntaxSymbol<?> endSymbol;
     private final SyntaxSymbol<?> startSymbol;
 
-    private final List<SyntaxProduction> productionList = new ArrayList<>();
+    private final Map<SyntaxSymbol<?>, Set<SyntaxProduction>> productionMap = new HashMap<>();
     private final Map<String, SyntaxSymbol<?>> syntaxSymbolMap = new HashMap<>();
 
     private final Map<SyntaxSymbol<?>, Integer> opPrecedenceMap = new HashMap<>();
+    private final boolean useDefaultOpPrecedence;
     private final AstConstructStrategy strategy;
 
     public LL1SyntaxInlineDefiner(SyntaxSymbol<?> epsSymbol,
-                                  SyntaxSymbol<?> endSymbol,
                                   SyntaxSymbol<?> startSymbol,
+                                  SyntaxSymbol<?> endSymbol,
                                   Map<SyntaxSymbol<?>, Integer> opPrecedenceMap,
                                   AstConstructStrategy strategy) {
         this.epsSymbol = epsSymbol;
-        this.endSymbol = endSymbol;
         this.startSymbol = startSymbol;
+        this.endSymbol = endSymbol;
 
         syntaxSymbolMap.put(epsSymbol.getName(), epsSymbol);
         syntaxSymbolMap.put(startSymbol.getName(), startSymbol);
 
         this.opPrecedenceMap.putAll(opPrecedenceMap);
+        useDefaultOpPrecedence = false;
+
+        this.strategy = strategy;
+    }
+
+    public LL1SyntaxInlineDefiner(SyntaxSymbol<?> epsSymbol,
+                                  SyntaxSymbol<?> startSymbol,
+                                  SyntaxSymbol<?> endSymbol,
+                                  AstConstructStrategy strategy) {
+        this.epsSymbol = epsSymbol;
+        this.startSymbol = startSymbol;
+        this.endSymbol = endSymbol;
+
+        syntaxSymbolMap.put(epsSymbol.getName(), epsSymbol);
+        syntaxSymbolMap.put(startSymbol.getName(), startSymbol);
+
+        useDefaultOpPrecedence = true;
+
         this.strategy = strategy;
     }
 
@@ -56,6 +75,23 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
         syntaxSymbolMap.put(startSymbol.getName(), startSymbol);
 
         this.opPrecedenceMap.putAll(opPrecedenceMap);
+        useDefaultOpPrecedence = false;
+
+        this.strategy = strategy;
+    }
+
+    public LL1SyntaxInlineDefiner(SyntaxSymbol<?> epsSymbol,
+                                  SyntaxSymbol<?> startSymbol,
+                                  AstConstructStrategy strategy) {
+        this.epsSymbol = epsSymbol;
+        this.startSymbol = startSymbol;
+        this.endSymbol = END_SYMBOL;
+
+        syntaxSymbolMap.put(epsSymbol.getName(), epsSymbol);
+        syntaxSymbolMap.put(startSymbol.getName(), startSymbol);
+
+        useDefaultOpPrecedence = true;
+
         this.strategy = strategy;
     }
 
@@ -81,12 +117,43 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
             bodySymbolList.add(bodySymbol);
         }
 
-        productionList.add(new LL1SyntaxProduction(headSymbol, bodySymbolList));
+        productionMap.putIfAbsent(headSymbol, new HashSet<>());
+        productionMap.get(headSymbol).add(new LL1SyntaxProduction(headSymbol, bodySymbolList));
     }
 
     @Override
     protected List<SyntaxProduction> loadSyntaxProductions() {
+        if (useDefaultOpPrecedence) {
+            opPrecedenceMap.clear();
+            opPrecedenceMap.putAll(loadDefaultOpPrecedenceMap());
+        }
+
+        List<SyntaxProduction> productionList = new ArrayList<>();
+        productionMap.values().forEach(productionList::addAll);
         return productionList;
+    }
+
+    protected Map<SyntaxSymbol<?>, Integer> loadDefaultOpPrecedenceMap() {
+        Map<SyntaxSymbol<?>, Integer> opPreMap = new HashMap<>();
+
+        Set<SyntaxProduction> startProductionSet = productionMap.get(startSymbol);
+        computeOpPrecedence(startProductionSet, 0, opPreMap);
+
+        opPreMap.entrySet().forEach(System.out::println);
+
+        return opPreMap;
+    }
+
+    private void computeOpPrecedence(Set<SyntaxProduction> productionSet, int level, Map<SyntaxSymbol<?>, Integer> opPreMap) {
+        if (productionSet.isEmpty()) return;
+
+        Set<SyntaxProduction> nextProductionSet = new HashSet<>();
+        for (SyntaxProduction p : productionSet) {
+            p.getBody().stream().filter(s -> s.getType().equals(SyntaxSymbolType.OP)).forEach(s -> opPreMap.put(s, level));
+            p.getBody().stream().filter(s -> !s.isTerminal() && !s.equals(p.getHead())).forEach(s -> nextProductionSet.addAll(productionMap.get(s)));
+        }
+
+        computeOpPrecedence(nextProductionSet, level + 1, opPreMap);
     }
 
     @Override
@@ -117,5 +184,10 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
     @Override
     public AstConstructStrategy getAstConstructStrategy() {
         return strategy;
+    }
+
+    public void setOpPrecedenceMap(Map<SyntaxSymbol<?>, Integer> opPrecedenceMap) {
+        this.opPrecedenceMap.clear();
+        this.opPrecedenceMap.putAll(opPrecedenceMap);
     }
 }
