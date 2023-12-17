@@ -1,5 +1,7 @@
 package io.github.riicarus.common.data;
 
+import io.github.riicarus.common.data.ast.ASTNode;
+
 /**
  * 语法分析结果
  *
@@ -9,18 +11,17 @@ package io.github.riicarus.common.data;
  */
 public class SyntaxParseResult {
 
-    private final AbstractAST<?> ast;
+    private final ASTNode ast;
 
-    public SyntaxParseResult(AbstractAST<?> ast) {
+    public SyntaxParseResult(ASTNode ast) {
         this.ast = ast;
     }
 
-    public AbstractAST<?> getAst() {
+    public ASTNode getAst() {
         return ast;
     }
 
-    @Override
-    public String toString() {
-        return "AST: \r\n" + ast;
+    public String print(String prefix) {
+        return prefix + "AST: \r\n" + ast.print(prefix + prefix);
     }
 }

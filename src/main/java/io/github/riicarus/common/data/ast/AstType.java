@@ -1,4 +1,4 @@
-package io.github.riicarus.common.data;
+package io.github.riicarus.common.data.ast;
 
 /**
  * AST 类型

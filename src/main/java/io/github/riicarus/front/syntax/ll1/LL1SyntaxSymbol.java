@@ -12,22 +12,22 @@ import java.util.Objects;
  * @create 2023-11-22 22:24
  * @since 1.0.0
  */
-public class LL1SyntaxSymbol<T> implements SyntaxSymbol<T> {
+public class LL1SyntaxSymbol implements SyntaxSymbol {
 
     private final String name;
     private final SyntaxSymbolType type;
     private final boolean isTerminal;
 
-    public LL1SyntaxSymbol(String name, boolean isTerminal, SyntaxSymbolType type) {
+    public LL1SyntaxSymbol(String name, SyntaxSymbolType type, boolean isTerminal) {
         this.name = name;
-        this.isTerminal = isTerminal;
         this.type = type;
+        this.isTerminal = isTerminal;
     }
 
     public LL1SyntaxSymbol(String name, SyntaxSymbolType type) {
         this.name = name;
-        this.isTerminal = false;
         this.type = type;
+        this.isTerminal = false;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class LL1SyntaxSymbol<T> implements SyntaxSymbol<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        LL1SyntaxSymbol<?> that = (LL1SyntaxSymbol<?>) o;
+        LL1SyntaxSymbol that = (LL1SyntaxSymbol) o;
         return Objects.equals(name, that.name);
     }
 

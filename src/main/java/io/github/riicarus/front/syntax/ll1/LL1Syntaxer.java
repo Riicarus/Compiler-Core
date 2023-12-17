@@ -1,9 +1,9 @@
 package io.github.riicarus.front.syntax.ll1;
 
-import io.github.riicarus.common.data.AbstractAST;
-import io.github.riicarus.common.data.AstConstructStrategy;
 import io.github.riicarus.common.data.SyntaxParseResult;
 import io.github.riicarus.common.data.Token;
+import io.github.riicarus.common.data.ast.ASTNode;
+import io.github.riicarus.common.data.ast.TerminalASTNode;
 import io.github.riicarus.front.lex.LexicalSymbol;
 import io.github.riicarus.front.syntax.*;
 
@@ -18,89 +18,178 @@ import java.util.*;
  */
 public class LL1Syntaxer implements Syntaxer {
 
-    private final SyntaxDefiner definition;
-    private final Map<SyntaxSymbol<?>, Map<String, Set<SyntaxProduction>>> analyzeMap = new HashMap<>();
+    class ProductionCreateSymbol<T extends ASTNode> extends LL1SyntaxSymbol {
 
-    // 分析栈
-    private final Stack<SyntaxSymbol<?>> syntaxStack = new Stack<>();
-    private SyntaxSymbol<?> topSymbol;
+        private final SyntaxProduction<T> production;
+
+        public ProductionCreateSymbol(SyntaxProduction<T> production) {
+            super("ProductionCreateSymbol", SyntaxSymbolType.ASST);
+            this.production = production;
+        }
+
+        public void create() {
+            List<ASTNode> children = new ArrayList<>();
+            for (SyntaxSymbol symbol : production.getRHS()) {
+                children.add(0, astStack.pop());
+            }
+
+            T nonterminalNode = production.createNode(children);
+            astStack.push(nonterminalNode);
+        }
+
+        @Override
+        public String toString() {
+            return super.toString() + " of " + production;
+        }
+    }
+
+    private final LL1SyntaxDefiner definer;
+    private final Map<SyntaxSymbol, Map<String, Set<SyntaxProduction<?>>>> analyzeMap = new HashMap<>();
+
+    private final List<Token> tokens = new ArrayList<>();
+    private final Set<LexicalSymbol> assistantLexSymbolSet = new HashSet<>();
+    private final Stack<SyntaxSymbol> parseStack = new Stack<>();
+    private final Stack<ASTNode> astStack = new Stack<>();
 
     private int tokenIdx;
-    private Token curToken;
-    private final List<Token> tokens = new ArrayList<>();
 
-    private final Set<LexicalSymbol> assistantLexSymbolSet = new HashSet<>();
+    public LL1Syntaxer(LL1SyntaxDefiner definer) {
+        this.definer = definer;
 
-    private AstConstructStrategy astConstructStrategy;
-    private final Stack<AbstractAST<?>> astStack = new Stack<>();
-    private final Stack<SyntaxSymbol<?>> opSymbolStack = new Stack<>();
-
-    public LL1Syntaxer(SyntaxDefiner definition) {
-        this.definition = definition;
-
-        definition.load();
+        definer.load();
         this.analyzeMap.clear();
-        this.analyzeMap.putAll(definition.getAnalyzeMap());
+        definer.getAnalyzeMap().forEach((symbol, setMap) ->
+                setMap.forEach((s, set) ->
+                        set.forEach(p -> {
+                            analyzeMap.putIfAbsent(symbol, new HashMap<>());
+                            analyzeMap.get(symbol).putIfAbsent(s, new HashSet<>());
+                            analyzeMap.get(symbol).get(s).add(p);
+                        })
+                )
+        );
     }
 
     @Override
-    public SyntaxParseResult parse(List<Token> tokenList, Set<LexicalSymbol> assistSet, AstConstructStrategy strategy) {
-        if (!reset(tokenList, assistSet, strategy))
-            throw new IllegalStateException("LL1Syntax wrong: token list is null.");
+    public SyntaxParseResult parse(List<Token> tokenList, Set<LexicalSymbol> assistSet) {
+        reset(tokenList, assistSet);
 
-        while (!syntaxStack.isEmpty() && !checkEnds()) {  // 如果分析栈不空, 并且没有遇到结束符
-            if (topSymbol.isTerminal())
-                handleTerminal();
-            else
-                handleNonterminal();
+        while (!checkEnds()) {
+            SyntaxSymbol top = parseStack.peek();
+
+            System.out.println();
+            System.out.println("Parse Stack:");
+            parseStack.forEach(symbol -> System.out.println("\t" + symbol));
+            System.out.println("AST Stack:");
+            astStack.forEach(node -> System.out.println("\t" + node));
+            System.out.println("Top Symbol:");
+            System.out.println("\t" + top);
+            System.out.println("Cur Token:");
+            System.out.println("\t" + curToken());
+
+            if (top.isTerminal()) {
+                if (top.equals(definer.getEpsilonSymbol())) {
+                    parseStack.pop();
+                } else if (top.getName().equals(curToken().getSymbol().getName())) {
+                    parseStack.pop();
+                    nextTokenIgnoreAssistant();
+                } else {
+                    throw new IllegalStateException("LL1Syntax wrong: terminal symbol not match, want: " + top + ", but get: " + curToken());
+                }
+
+                if (!top.equals(definer.getEndSymbol())) {
+                    astStack.push(new TerminalASTNode(top));
+                }
+                continue;
+            }
+
+            // 创建对应的非终结符的 AST
+            if (top instanceof ProductionCreateSymbol<?>) {
+                ((ProductionCreateSymbol<?>) top).create();
+                parseStack.pop();
+                continue;
+            }
+
+            SyntaxProduction<?> production = getProduction(top);
+            if (production != null) {
+                parseStack.pop();
+
+                ProductionCreateSymbol<?> createSymbol = new ProductionCreateSymbol<>(production);
+                parseStack.push(createSymbol);
+
+                // 将产生式的右部符号反向压入分析栈
+                List<SyntaxSymbol> rhs = production.getRHS();
+                for (int i = rhs.size() - 1; i >= 0; i--) {
+                    parseStack.push(rhs.get(i));
+                }
+                System.out.println("Apply Production:");
+                System.out.println("\t" + production);
+            } else {
+                throw new IllegalStateException("LL1Syntax wrong: not production found for symbol: " + top);
+            }
         }
 
-        handlePostProcessAstConstruction();
+        System.out.println();
+        System.out.println("Parse Stack:");
+        parseStack.forEach(symbol -> System.out.println("\t" + symbol));
+        System.out.println("AST Stack:");
+        astStack.forEach(node -> System.out.println("\t" + node));
 
-        if (astStack.size() != 1)
-            throw new IllegalStateException("LL1Syntax wrong: not expected: ast stack's remaining size is not 1.");
+        if (astStack.size() != 1) {
+            throw new IllegalStateException("LL1Syntax wrong: ast stack should only have one element, but get: " + astStack);
+        }
 
         return new SyntaxParseResult(astStack.pop());
     }
 
-    @SuppressWarnings("all") // 抑制空 while 循环
-    private void nextTokenIgnoreAssitant() {
-        while (nextToken() && assistantLexSymbolSet.contains(tokens.get(tokenIdx).getSymbol())) ;
-    }
-
-    private boolean nextToken() {
-        if (tokenIdx < tokens.size()) {
-            tokenIdx++;
-            curToken = tokens.get(tokenIdx);
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean reset(List<Token> tokenList, Set<LexicalSymbol> assistSet, AstConstructStrategy strategy) {
+    private void reset(List<Token> tokenList, Set<LexicalSymbol> assistSet) {
         tokenIdx = -1;
-        curToken = null;
-        topSymbol = null;
+
+        astStack.clear();
+
+        parseStack.clear();
+        parseStack.push(definer.getEndSymbol());
+        parseStack.push(definer.getStartSymbol());
 
         tokens.clear();
         tokens.addAll(tokenList);
 
-        if (!nextToken()) return false;
-
         assistantLexSymbolSet.clear();
         assistantLexSymbolSet.addAll(assistSet);
 
-        astConstructStrategy = strategy;
+        nextTokenIgnoreAssistant();
+    }
 
-        syntaxStack.clear();
-        syntaxStack.push(definition.getEndSymbol());
-        syntaxStack.push(definition.getStartSymbol());
+    public void nextTokenIgnoreAssistant() {
+        do {
+            nextToken();
+        } while (curToken() != null && assistantLexSymbolSet.contains(curToken().getSymbol()));
+    }
 
-        astStack.clear();
-        opSymbolStack.clear();
+    public Token curToken() {
+        return tokenEnds() ? null : tokens.get(tokenIdx);
+    }
 
-        return true;
+    public void nextToken() {
+        if (!tokenEnds()) {
+            tokenIdx++;
+        }
+    }
+
+    public boolean tokenEnds() {
+        return tokenIdx >= tokens.size();
+    }
+
+    public SyntaxProduction<?> getProduction(SyntaxSymbol symbol) {
+        if (analyzeMap.get(symbol) == null) return null;
+
+        Set<SyntaxProduction<?>> productionSet = analyzeMap.get(symbol).get(curToken().getSymbol().getName());
+
+        if (productionSet == null) {
+            throw new IllegalStateException("LL1Syntax error: can not get production of symbol: " + symbol + ", cur token: " + curToken());
+        }
+
+        // LL1 的 productionSet 中只会有一个元素
+        return productionSet.stream().findFirst().orElse(null);
     }
 
     /**
@@ -108,15 +197,16 @@ public class LL1Syntaxer implements Syntaxer {
      *
      * @return true-分析完成; false-分析未完成
      */
-    private boolean checkEnds() {
-        topSymbol = syntaxStack.peek();
+    public boolean checkEnds() {
+        if (parseStack.isEmpty()) return true;
 
-        if (topSymbol.equals(definition.getEndSymbol())) {
-            if (tokenIdx >= tokens.size())  // 如果 tokens 已经遍历完, 报错
+        SyntaxSymbol topSymbol = parseStack.peek();
+        if (topSymbol.equals(definer.getEndSymbol())) {
+            if (tokenEnds())  // 如果 tokens 已经遍历完, 报错
                 throw new IllegalStateException("LL1Syntax wrong: syntax not complete, want: \"" + topSymbol + "\" but get null.");
             else {
-                if (curToken.getSymbol().getName().equals(definition.getEndSymbol().getName())) {  // 如果 tokens 也是结束符号, 就直接消去
-                    syntaxStack.pop();
+                if (curToken().getSymbol().getName().equals(definer.getEndSymbol().getName())) {  // 如果 tokens 也是结束符号, 就直接消去
+                    parseStack.pop();
                     return true;
                 } else    // 否则报错
                     throw new IllegalStateException("LL1Syntax wrong: syntax complete, but get \"" + topSymbol + "\".");
@@ -126,96 +216,8 @@ public class LL1Syntaxer implements Syntaxer {
         return false;
     }
 
-    /**
-     * 处理终结符
-     */
-    private void handleTerminal() {
-        if (topSymbol.equals(definition.getEpsilonSymbol())) {    // 空串直接弹出
-            syntaxStack.pop();
-        } else if (topSymbol.getName().equals(curToken.getSymbol().getName())) { // 非空终结符弹出, 匹配下一个 token
-            syntaxStack.pop();
-            handleInProcessAstConstruction(curToken);
-            nextTokenIgnoreAssitant();
-        } else {    // 找不到对应的非终结符
-            throw new IllegalStateException("LL1Syntax wrong: want : \"" + topSymbol.getName() + "\", get: \"" + curToken.getSymbol().getName() + "\"");
-        }
-    }
-
-    /**
-     * 处理非终结符
-     */
-    private void handleNonterminal() {
-        syntaxStack.pop();
-        // handleAstGeneration(curToken);
-
-        Map<String, Set<SyntaxProduction>> setMap = analyzeMap.get(topSymbol);
-        if (setMap == null || setMap.isEmpty())
-            throw new IllegalStateException("LL1Syntax wrong: analyze map can not find symbol: \"" + topSymbol);
-
-        Set<SyntaxProduction> productionSet = setMap.get(curToken.getSymbol().getName());
-        if (productionSet == null || productionSet.isEmpty())
-            throw new IllegalStateException("LL1Syntax wrong: illegal token: " + curToken + " for current symbol: " + topSymbol);
-
-        productionSet.forEach(
-                // 注意, LL1 文法中的 Set 实际上只会有一个产生式, 这里只循环一次.
-                p -> {
-                    for (int j = p.getBody().size() - 1; j >= 0; j--) {
-                        syntaxStack.push(p.getBody().get(j));
-                    }
-                });
-    }
-
-    /**
-     * 处理 token 没有被完全遍历的情况.
-     * <p>将文法符号类型为 OP 的符号放入符号栈中</p>
-     * <p>如果符号栈栈顶符号的优先级不低于当前分析到的符号,</p>
-     * <p>那么就优先处理符号栈栈顶的符号, 直到栈顶符号优先级低于当前分析的符号.</p>
-     * <br/>
-     * <p>用符号优先级的方式来保证执行的优先级顺序.</p>
-     *
-     * @param token 当前被分析的 token
-     */
-    private void handleInProcessAstConstruction(Token token) {
-        if (topSymbol.equals(definition.getEndSymbol())) return;
-
-        if (topSymbol.getType().equals(SyntaxSymbolType.OP)) {
-            if (!opSymbolStack.isEmpty()) {
-                SyntaxSymbol<?> topOp;
-                int pTop = definition.getOpPrecedenceMap().get(topSymbol);
-                int pTopOp;
-
-                // 如果符号栈栈顶的符号的优先级比当前分析符号的优先级高, 先处理符号栈栈顶的符号
-                for (
-                        topOp = opSymbolStack.peek(), pTopOp = definition.getOpPrecedenceMap().get(topOp);
-                        pTopOp >= pTop;
-                        topOp = opSymbolStack.peek(), pTopOp = definition.getOpPrecedenceMap().get(topOp)
-                ) {
-                    opSymbolStack.pop();
-                    AbstractAST<?> ast = topOp.constructAST(astConstructStrategy, topOp.getName(), astStack, opSymbolStack);
-                    if (ast != null) astStack.push(ast);
-
-                    if (opSymbolStack.isEmpty()) break;
-                }
-            }
-
-            opSymbolStack.push(topSymbol);
-        } else {
-            AbstractAST<?> abstractAST = topSymbol.constructAST(astConstructStrategy, token.getLexeme(), astStack, opSymbolStack);
-            if (abstractAST == null) return;
-            astStack.push(abstractAST);
-        }
-    }
-
-    /**
-     * 此时所有的 SyntaxSymbol 都被检查了一一遍, 要么被压入符号栈中, 要么被构建成为了 AST.
-     */
-    private void handlePostProcessAstConstruction() {
-        while (!opSymbolStack.isEmpty()) {
-            SyntaxSymbol<?> op = opSymbolStack.pop();
-
-            AbstractAST<?> ast = op.constructAST(astConstructStrategy, op.getName(), astStack, opSymbolStack);
-            if (ast == null) continue;
-            astStack.push(ast);
-        }
+    public SyntaxDefiner getDefiner() {
+        return definer;
     }
 }
+

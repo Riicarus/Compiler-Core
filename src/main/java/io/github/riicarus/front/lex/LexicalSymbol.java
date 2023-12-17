@@ -2,7 +2,7 @@ package io.github.riicarus.front.lex;
 
 import io.github.riicarus.common.data.Token;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * 词法符号接口.
@@ -23,7 +23,7 @@ public interface LexicalSymbol {
 
     Token validate(String s);
 
-    static Token validateLongest(String s, Set<LexicalSymbol> symbolSet) {
+    static Token validateLongest(String s, List<LexicalSymbol> symbolSet) {
         {
             Token target = null;
             for (LexicalSymbol symbol : symbolSet) {

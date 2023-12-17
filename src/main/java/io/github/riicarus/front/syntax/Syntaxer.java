@@ -1,6 +1,5 @@
 package io.github.riicarus.front.syntax;
 
-import io.github.riicarus.common.data.AstConstructStrategy;
 import io.github.riicarus.common.data.SyntaxParseResult;
 import io.github.riicarus.common.data.Token;
 import io.github.riicarus.front.lex.LexicalSymbol;
@@ -23,10 +22,9 @@ public interface Syntaxer {
      * <li>变量名表</li>
      * <li>过程名表</li>
      *
-     * @param tokenList 需要解析的词法符号列表
+     * @param tokenList             需要解析的词法符号列表
      * @param assistantLexSymbolSet 辅助词法符号集合
-     * @param strategy  AST 构建策略工厂
      * @return 分析结果
      */
-    SyntaxParseResult parse(List<Token> tokenList, Set<LexicalSymbol> assistantLexSymbolSet, AstConstructStrategy strategy);
+    SyntaxParseResult parse(List<Token> tokenList, Set<LexicalSymbol> assistantLexSymbolSet);
 }
