@@ -125,6 +125,7 @@ $$
 语法中存在左递归, 如: $(42), (43)$, 将他们消除左递归后, 文法如下:
 
 $(42)$ 对应文法:
+
 $$
 \begin{align}
 & AE \to I \; AE' \\
@@ -133,6 +134,7 @@ $$
 $$
 
 $(43)$ 对应文法:
+
 $$
 \begin{align}
 & I \to F \; I' \\
@@ -151,6 +153,7 @@ $(45)$: $F \to V$ 和 $F \to FC$ 都以 $identifier$ 开始.
 更改后:
 
 $(31)$ 对应文法:
+
 $$
 \begin{align}
 & DS \to integer \; VDorFDS \\
@@ -159,6 +162,7 @@ $$
 $$
 
 $(45)$ 对应文法:
+
 $$
 \begin{align}
 & F \to VorFC \mid C \\
