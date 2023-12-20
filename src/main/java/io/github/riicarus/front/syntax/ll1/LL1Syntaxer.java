@@ -2,10 +2,12 @@ package io.github.riicarus.front.syntax.ll1;
 
 import io.github.riicarus.common.data.SyntaxParseResult;
 import io.github.riicarus.common.data.Token;
-import io.github.riicarus.common.data.ast.ASTNode;
-import io.github.riicarus.common.data.ast.TerminalASTNode;
+import io.github.riicarus.common.data.ast.detailed.DetailedASTNode;
 import io.github.riicarus.front.lex.LexicalSymbol;
-import io.github.riicarus.front.syntax.*;
+import io.github.riicarus.front.syntax.SyntaxDefiner;
+import io.github.riicarus.front.syntax.SyntaxProduction;
+import io.github.riicarus.front.syntax.SyntaxSymbol;
+import io.github.riicarus.front.syntax.Syntaxer;
 
 import java.util.*;
 
@@ -18,17 +20,17 @@ import java.util.*;
  */
 public class LL1Syntaxer implements Syntaxer {
 
-    class ProductionCreateSymbol<T extends ASTNode> extends LL1SyntaxSymbol {
+    class ProductionCreateSymbol<T extends DetailedASTNode> extends LL1SyntaxSymbol {
 
         private final SyntaxProduction<T> production;
 
         public ProductionCreateSymbol(SyntaxProduction<T> production) {
-            super("ProductionCreateSymbol", SyntaxSymbolType.ASST);
+            super("ProductionCreateSymbol", true);
             this.production = production;
         }
 
         public void create() {
-            List<ASTNode> children = new ArrayList<>();
+            List<DetailedASTNode> children = new ArrayList<>();
             for (SyntaxSymbol symbol : production.getRHS()) {
                 children.add(0, astStack.pop());
             }
@@ -49,7 +51,7 @@ public class LL1Syntaxer implements Syntaxer {
     private final List<Token> tokens = new ArrayList<>();
     private final Set<LexicalSymbol> assistantLexSymbolSet = new HashSet<>();
     private final Stack<SyntaxSymbol> parseStack = new Stack<>();
-    private final Stack<ASTNode> astStack = new Stack<>();
+    private final Stack<DetailedASTNode> astStack = new Stack<>();
 
     private int tokenIdx;
 
@@ -96,25 +98,25 @@ public class LL1Syntaxer implements Syntaxer {
                     throw new IllegalStateException("LL1Syntax wrong: terminal symbol not match, want: " + top + ", but get: " + curToken());
                 }
 
-                if (!top.equals(definer.getEndSymbol())) {
-                    astStack.push(new TerminalASTNode(top));
-                }
+//                if (!top.equals(definer.getEndSymbol())) {
+//                    astStack.push(new TerminalASTNode(top));
+//                }
                 continue;
             }
 
-            // 创建对应的非终结符的 AST
-            if (top instanceof ProductionCreateSymbol<?>) {
-                ((ProductionCreateSymbol<?>) top).create();
-                parseStack.pop();
-                continue;
-            }
+//            // 创建对应的非终结符的 AST
+//            if (top instanceof ProductionCreateSymbol<?>) {
+//                ((ProductionCreateSymbol<?>) top).create();
+//                parseStack.pop();
+//                continue;
+//            }
 
             SyntaxProduction<?> production = getProduction(top);
             if (production != null) {
                 parseStack.pop();
 
-                ProductionCreateSymbol<?> createSymbol = new ProductionCreateSymbol<>(production);
-                parseStack.push(createSymbol);
+//                ProductionCreateSymbol<?> createSymbol = new ProductionCreateSymbol<>(production);
+//                parseStack.push(createSymbol);
 
                 // 将产生式的右部符号反向压入分析栈
                 List<SyntaxSymbol> rhs = production.getRHS();

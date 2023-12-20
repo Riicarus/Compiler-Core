@@ -110,14 +110,17 @@ public class CharUtil {
             PASCAL_CHAR_SET.add((char) i);
         }
 
-        PASCAL_CHAR_SET.addAll(List.of('*', '-', '(', ')', '\n', '\r', ' ', (char) 26, CharUtil.LEX_SYNTAX_END));
+        PASCAL_CHAR_SET.addAll(List.of('*','/', '+', '-', ',', '(', ')', '[', ']', '{', '}', '!', '_', '|', '&', '!', '\n', '\r', ' ', '"', (char) 26, CharUtil.LEX_SYNTAX_END));
         PASCAL_CHAR_SET.addAll(REGEX_ESCAPE_CHAR_MAP.values());
     }
 
     public static final String LETTER_REGEX = "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z";
     public static final String DIGIT_REGEX = "0|1|2|3|4|5|6|7|8|9";
+    public static final String CHAR_REGEX = LETTER_REGEX + UNION + DIGIT_REGEX + UNION + " " + UNION + "_";
     public static final String IDENTIFIER_REGEX = L_BRACKET + LETTER_REGEX + R_BRACKET + L_BRACKET + LETTER_REGEX + UNION + DIGIT_REGEX + R_BRACKET + CLOSURE;
     public static final String NUMBER_REGEX = L_BRACKET + DIGIT_REGEX + R_BRACKET + L_BRACKET + DIGIT_REGEX + R_BRACKET + CLOSURE;
+    public static final String FLOAT_REGEX = NUMBER_REGEX + "." + NUMBER_REGEX;
+    public static final String STRING_REGEX = "\"" + L_BRACKET + CHAR_REGEX + R_BRACKET + CLOSURE + "\"";
 
     /*
      * 对文法中需要用到的符号进行定义和处理.

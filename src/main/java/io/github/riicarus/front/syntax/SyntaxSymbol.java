@@ -11,8 +11,6 @@ public interface SyntaxSymbol {
 
     String getName();
 
-    SyntaxSymbolType getType();
-
     boolean isTerminal();
 
 }

@@ -1,4 +1,4 @@
-package io.github.riicarus.common.data.ast;
+package io.github.riicarus.common.data.ast.detailed;
 
 import io.github.riicarus.front.syntax.SyntaxSymbol;
 
@@ -9,7 +9,7 @@ import io.github.riicarus.front.syntax.SyntaxSymbol;
  * @create 2023-12-17 3:56
  * @since 1.0.0
  */
-public class TerminalASTNode extends ASTNode {
+public class TerminalASTNode extends DetailedASTNode {
 
     private TerminalASTNode() {
     }

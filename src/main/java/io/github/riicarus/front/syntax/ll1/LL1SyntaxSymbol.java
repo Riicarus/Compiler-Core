@@ -1,7 +1,6 @@
 package io.github.riicarus.front.syntax.ll1;
 
 import io.github.riicarus.front.syntax.SyntaxSymbol;
-import io.github.riicarus.front.syntax.SyntaxSymbolType;
 
 import java.util.Objects;
 
@@ -15,29 +14,21 @@ import java.util.Objects;
 public class LL1SyntaxSymbol implements SyntaxSymbol {
 
     private final String name;
-    private final SyntaxSymbolType type;
     private final boolean isTerminal;
 
-    public LL1SyntaxSymbol(String name, SyntaxSymbolType type, boolean isTerminal) {
+    public LL1SyntaxSymbol(String name, boolean isTerminal) {
         this.name = name;
-        this.type = type;
         this.isTerminal = isTerminal;
     }
 
-    public LL1SyntaxSymbol(String name, SyntaxSymbolType type) {
+    public LL1SyntaxSymbol(String name) {
         this.name = name;
-        this.type = type;
         this.isTerminal = false;
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public SyntaxSymbolType getType() {
-        return type;
     }
 
     @Override
@@ -60,6 +51,6 @@ public class LL1SyntaxSymbol implements SyntaxSymbol {
 
     @Override
     public String toString() {
-        return name + "(" + type + ", " + isTerminal + ")";
+        return name + "(" + isTerminal + ")";
     }
 }

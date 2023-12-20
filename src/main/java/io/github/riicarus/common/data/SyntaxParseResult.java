@@ -1,6 +1,6 @@
 package io.github.riicarus.common.data;
 
-import io.github.riicarus.common.data.ast.ASTNode;
+import io.github.riicarus.common.data.ast.detailed.DetailedASTNode;
 
 /**
  * 语法分析结果
@@ -11,13 +11,13 @@ import io.github.riicarus.common.data.ast.ASTNode;
  */
 public class SyntaxParseResult {
 
-    private final ASTNode ast;
+    private final DetailedASTNode ast;
 
-    public SyntaxParseResult(ASTNode ast) {
+    public SyntaxParseResult(DetailedASTNode ast) {
         this.ast = ast;
     }
 
-    public ASTNode getAst() {
+    public DetailedASTNode getAst() {
         return ast;
     }
 

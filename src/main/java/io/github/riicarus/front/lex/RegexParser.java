@@ -2,6 +2,8 @@ package io.github.riicarus.front.lex;
 
 import io.github.riicarus.common.util.CharUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
@@ -28,7 +30,7 @@ public class RegexParser {
      * @return NFA
      */
     public static NFA reToNFA(String expr, Set<Character> inputCharSet) {
-        if (!isRegexLegal(expr, inputCharSet)) throw new IllegalArgumentException("RegExp is not legal.");
+        if (!isRegexLegal(expr, inputCharSet)) throw new IllegalArgumentException("RegExp is not legal, expr: " + expr);
         return reSuffixToNFA(infixToSuffix(reToInfix(expr)), inputCharSet);
     }
 
@@ -180,6 +182,7 @@ public class RegexParser {
      * @return 正则表达式是否合法
      */
     private static boolean isRegexLegal(String expr, Set<Character> inputCharSet) {
+        List<Character> chars = new ArrayList<>();
         Stack<Character> bracktStack = new Stack<>();
 
         if (inputCharSet == null || inputCharSet.isEmpty())
@@ -198,11 +201,14 @@ public class RegexParser {
             if (needEscape) {
                 if (CharUtil.canRegexEscape(c)) {
                     needEscape = false;
+                    chars.add(CharUtil.escapeRegex(c));
                     continue;
                 } else {
                     return false;
                 }
             }
+
+            chars.add(c);
 
             // 判断非转义字符
             if (inputCharSet.contains(c)) continue;
@@ -217,8 +223,8 @@ public class RegexParser {
 
         if (!bracktStack.isEmpty()) return false;
 
-        for (int i = 0; i < expr.length(); i++) {
-            char c = expr.charAt(i);
+        for (int i = 0; i < chars.size(); i++) {
+            char c = chars.get(i);
             char next;
             if (c == CharUtil.UNION) {
                 if (i == 0 || i == expr.length() - 1) {

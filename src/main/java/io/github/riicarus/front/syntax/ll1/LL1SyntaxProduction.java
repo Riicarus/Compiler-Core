@@ -1,8 +1,8 @@
 package io.github.riicarus.front.syntax.ll1;
 
-import io.github.riicarus.common.data.ast.ASTCreator;
-import io.github.riicarus.common.data.ast.ASTNode;
-import io.github.riicarus.common.data.ast.NonterminalASTNode;
+import io.github.riicarus.common.data.ast.DetailedASTCreator;
+import io.github.riicarus.common.data.ast.detailed.DetailedASTNode;
+import io.github.riicarus.common.data.ast.detailed.NonterminalASTNode;
 import io.github.riicarus.front.syntax.SyntaxProduction;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
 
@@ -22,9 +22,9 @@ public class LL1SyntaxProduction<T extends NonterminalASTNode> implements Syntax
 
     private final SyntaxSymbol lhs;
     private final List<SyntaxSymbol> rhs = new ArrayList<>();
-    private final ASTCreator<T> creator;
+    private final DetailedASTCreator<T> creator;
 
-    public LL1SyntaxProduction(SyntaxSymbol lhs, List<SyntaxSymbol> rhs, ASTCreator<T> creator) {
+    public LL1SyntaxProduction(SyntaxSymbol lhs, List<SyntaxSymbol> rhs, DetailedASTCreator<T> creator) {
         if (lhs == null)
             throw new IllegalArgumentException("LL1 syntax production build failed: production's left hand side can not be null.");
 
@@ -47,12 +47,12 @@ public class LL1SyntaxProduction<T extends NonterminalASTNode> implements Syntax
     }
 
     @Override
-    public ASTCreator<T> getASTCreator() {
+    public DetailedASTCreator<T> getASTCreator() {
         return creator;
     }
 
     @Override
-    public T createNode(List<ASTNode> children) {
+    public T createNode(List<DetailedASTNode> children) {
         final T node = creator.apply(children);
         node.setSymbol(lhs);
         return node;

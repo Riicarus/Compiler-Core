@@ -6,6 +6,8 @@ import io.github.riicarus.front.syntax.SyntaxSymbol;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.joining;
+
 /**
  * LL1 文法定义抽象类.
  *
@@ -94,7 +96,12 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
                     }
 
                     // 如果是非终结符, 将 FIRST(beta) 添加到 FIRST(head) 中
-                    hasNew |= firstSetMap.get(head).addAll(firstSetMap.get(beta));
+                    Set<SyntaxSymbol> firstSet = firstSetMap.get(head);
+                    if (firstSet == null) {
+                        throw new IllegalStateException("LL1Syntax error: can not find any production's left hand sid symbol is: " + beta
+                                + ", please check you syntax definition.");
+                    }
+                    hasNew |= firstSet.addAll(firstSetMap.get(beta));
 
                     // 如果是不可能为空的非终结符, 停止遍历
                     if (!nullableSymbolSet.contains(beta)) break;
@@ -139,7 +146,12 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
 
                     // 非终结符
                     if (i == betaList.size() - 1) {
-                        hasNew |= followSetMap.get(beta).addAll(followSetMap.get(production.getLHS()));
+                        Set<SyntaxSymbol> followSet = followSetMap.get(beta);
+                        if (followSet == null) {
+                            throw new IllegalStateException("LL1Syntax error: can not find any production's left hand sid symbol is: " + beta
+                                    + ", please check you syntax definition.");
+                        }
+                        hasNew |= followSet.addAll(followSetMap.get(production.getLHS()));
                     }
 
                     hasNew |= followSetMap.get(beta).addAll(tmp);
@@ -213,15 +225,21 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
                 )
         );
 
+        List<String> invalidTransMapTipList = new ArrayList<>();
         for (Map.Entry<SyntaxSymbol, Map<String, Set<SyntaxProduction<?>>>> entry : LL1AnalyzeMap.entrySet()) {
             for (Map.Entry<String, Set<SyntaxProduction<?>>> innerEntry : entry.getValue().entrySet()) {
                 if (innerEntry.getValue().size() > 1) {
-                    throw new IllegalStateException("LL1Syntax not support: " +
-                            "there are more than 1 elements of transition map, " +
-                            "maybe you should eliminate left recursions or extract left common factors.\r\n" +
-                            entry.getKey() + "--[" + innerEntry.getKey() + "]-->" + innerEntry.getValue());
+                    invalidTransMapTipList.add(entry.getKey() + "--[" + innerEntry.getKey() + "]-->\r\n\t\t"
+                            + innerEntry.getValue().stream().map(SyntaxProduction::toString).collect(joining("\r\n\t\t")));
                 }
             }
+        }
+
+        if (!invalidTransMapTipList.isEmpty()) {
+            throw new IllegalStateException("LL1Syntax not support: " +
+                    "there are more than 1 elements of transition map, " +
+                    "maybe you should eliminate left recursions or extract left common factors.\r\n\t" +
+                    String.join("\r\n\t", invalidTransMapTipList));
         }
     }
 

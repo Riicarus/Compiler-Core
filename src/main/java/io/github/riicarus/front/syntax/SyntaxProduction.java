@@ -1,7 +1,7 @@
 package io.github.riicarus.front.syntax;
 
-import io.github.riicarus.common.data.ast.ASTCreator;
-import io.github.riicarus.common.data.ast.ASTNode;
+import io.github.riicarus.common.data.ast.DetailedASTCreator;
+import io.github.riicarus.common.data.ast.detailed.DetailedASTNode;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
  * @create 2023-11-23 16:05
  * @since 1.0.0
  */
-public interface SyntaxProduction<T extends ASTNode> {
+public interface SyntaxProduction<T extends DetailedASTNode> {
 
     /**
      * 获取产生式左部.
@@ -33,7 +33,7 @@ public interface SyntaxProduction<T extends ASTNode> {
      *
      * @return AST 构造器
      */
-    ASTCreator<T> getASTCreator();
+    DetailedASTCreator<T> getASTCreator();
 
     /**
      * 创建 AST 节点
@@ -41,6 +41,6 @@ public interface SyntaxProduction<T extends ASTNode> {
      * @param children 子节点列表
      * @return AST 节点
      */
-    T createNode(List<ASTNode> children);
+    T createNode(List<DetailedASTNode> children);
 
 }

@@ -27,6 +27,7 @@ $$
 & constant \to number \\
 & begin \to begin \\
 & end \to end \\
+& return \to return \\
 & integer \to integer \\
 & if \to if \\
 & then \to then \\
@@ -40,8 +41,10 @@ $$
 & < \to < \\
 & >= \to >= \\
 & > \to > \\
+& + \to + \\
 & - \to - \\
 & * \to * \\
+& / \to / \\
 & := \to := \\
 & ( \to ( \\
 & ) \to ) \\
@@ -94,27 +97,30 @@ public interface Syntaxer {
 
 $$
 \begin{align}
-& P \to SP\\
-& SP \to begin \; DST \; EST \; end \\
+& P \to CB\\
+& CB \to begin \; DST \; EST \; end \\
 & DST \to DS ; \; DST \mid \epsilon \\
 & DS \to VD \mid FD \\
-& VD \to integer \; V \\
-& V \to Id \\
+& VD \to T \; Id \\
+& T \to integer \mid boolean \mid float \mid string \\
 & Id \to identifier \\
-& FD \to integer \; function \; Id (A); \; FB \\
-& A \to V \\
-& FB \to begin \; DST \; EST \; end \\
+& FD \to T \; function \; Id (ADT); \; CB \\
+& ADT \to T \; Id \; ADTS \mid \epsilon \\
+& ADTS \to , \; T \; Id \; ADTS \mid \epsilon \\
 & EST \to ES ; \; EST \mid \epsilon \\
-& ES \to RS \mid WS \mid AS \mid CS \\
-& RS \to read(V) \\
-& WS \to write(V) \\
-& AS \to V := AE \\
-& AE \to AE - I \mid I \\
-& I \to I * F \mid F \\
-& F \to V \mid C \mid FC \\
-& FC \to Id (AE) \\
+& ES \to RS \mid WS \mid AS \mid CS \mid RT \\
+& RS \to read(Id) \\
+& WS \to write(Id) \\
+& RT \to return \; AE \\
+& AS \to Id := AE \\
+& AE \to AE - I \mid AE + I \mid I \\
+& I \to I * F \mid I / F \mid F \\
+& F \to Id \mid C \mid FC \\
+& FC \to Id (AL) \\
+& AL \to AE \; ALS \mid \epsilon \\
+& ALS \to , \; AE \; ALS \mid \epsilon \\
 & C \to constant \\
-& CS \to if \; CE \; then \; ES \; else \; ES \\
+& CS \to if \; CE \; then \; CB \; else \; CB \\
 & CE \to AE \; RO \; AE \\
 & RO \to < \mid <= \mid > \mid >= \mid = \mid <> \\
 \end{align}
@@ -122,52 +128,71 @@ $$
 
 #### 消除左递归
 
-语法中存在左递归, 如: $(42), (43)$, 将他们消除左递归后, 文法如下:
+语法中存在左递归, 如: $(47), (48)$, 将他们消除左递归后, 文法如下:
 
-$(42)$ 对应文法:
+$(48)$ 对应文法:
 
 $$
 \begin{align}
-& AE \to I \; AE' \\
-& AE' \to - \; I \; AE' \mid \epsilon \\
+& AE \to I \; AES \\
+& AES \to - I \; AES \mid + I \; AES \mid \epsilon \\
 \end{align}
 $$
 
-$(43)$ 对应文法:
+$(49)$ 对应文法:
 
 $$
 \begin{align}
-& I \to F \; I' \\
-& I' \to * \; F \; I' \mid \epsilon \\
+& I \to F \; IS \\
+& IS \to * F \; IS \mid / F \; IS \mid \epsilon \\
 \end{align}
 $$
 
 #### 消除公共左因子
 
-语法中有两处公共左因子 $(31)$ 和 $(45)$:
+语法中有两处公共左因子 $(34), (35), (38)$ 和 $(50), (51)$:
 
-$(31)$: $VD \to integer \; V$ 和 $FD \to integer \; function \; Id (A); \; FB$ 都以 $integer$ 开始.
-
-$(45)$: $F \to V$ 和 $F \to FC$ 都以 $identifier$ 开始.
-
-更改后:
-
-$(31)$ 对应文法:
+$(34), (35), (38)$ 中:
 
 $$
 \begin{align}
-& DS \to integer \; VDorFDS \\
-& VDorFDS \to V \mid function \; Id (A); \; FB \\
+& DS \to VD \mid FD \\
+& VD \to T \; Id \\
+& FD \to T \; function \; Id (ADT); \; CB \\
 \end{align}
 $$
 
-$(45)$ 对应文法:
+都以 $T$ 开始.
+
+$(50), (51)$ 中:
+
+$$
+\begin{align}
+& F \to Id \mid FC \\
+& FC \to Id(AL) \\
+\end{align}
+$$
+
+都以 $Id$ 开始.
+
+**更改后**:
+
+$(34), (35), (38)$ 对应文法:
+
+$$
+\begin{align}
+& DS \to T \; VDorFDS \\
+& VDorFDS \to Id \mid function \; Id (ADT); \; CB \\
+\end{align}
+$$
+
+$(50), (51)$ 对应文法:
 
 $$
 \begin{align}
 & F \to VorFC \mid C \\
-& VorFC \to Id \; VorFCS \\
-& VorFCS \to (A) \mid \epsilon \\
+& VorFC \to Id \;\; VorFCS \\
+& VorFCS \to (AL) \mid \epsilon \\
 \end{align}
 $$
 
@@ -175,31 +200,37 @@ $$
 
 $$
 \begin{align}
-& P \to SP\\
-& SP \to begin \; DST \; EST \; end \\
+& P \to CB\\
+& CB \to begin \; DST \; EST \; end \\
 & DST \to DS ; \; DST \mid \epsilon \\
-& DS \to integer \; VDorFDS \\
-& VDorFDS \to V \mid function \; Id (A); \; FB \\
-& V \to Id \\
+& DS \to T \; VDorFDS \\
+& VDorFDS \to Id \mid function \; Id (ADT); \; CB \\
+& T \to integer \mid boolean \mid float \mid string \\
 & Id \to identifier \\
-& A \to V \\
-& FB \to begin \; DST \; EST \; end \\
+& ADT \to T \; Id \; ADTS \mid \epsilon \\
+& ADTS \to , \; T \; Id \; ADTS \mid \epsilon \\
 & EST \to ES ; \; EST \mid \epsilon \\
-& ES \to RS \mid WS \mid AS \mid CS \\
-& RS \to read(V) \\
-& WS \to write(V) \\
-& AS \to V := AE \\
-& AE \to I \; AE' \\
-& AE' \to - \; I \; AE' \mid \epsilon \\
-& I \to F \; I' \\
-& I' \to * \; F \; I' \mid \epsilon \\
+& ES \to RS \mid WS \mid AS \mid CS \mid RT \\
+& RS \to read(Id) \\
+& WS \to write(Id) \\
+& RT \to return \; AE \\
+& AS \to Id := AE \\
+& AE \to I \; AES \\
+& AES \to - I \; AES \mid + I \; AES \mid \epsilon \\
+& I \to F \; IS \\
+& IS \to * F \; IS \mid / F \; IS \mid \epsilon \\
 & F \to VorFC \mid C \\
-& VorFC \to Id \;\; VorFCS \\
-& VorFCS \to (AE) \mid \epsilon \\
+& VorFC \to Id \; VorFCS \\
+& VorFCS \to (AL) \mid \epsilon \\
+& AL \to AE \; ALS \mid \epsilon \\
+& ALS \to , \; AE \; ALS \mid \epsilon \\
 & C \to constant \\
-& CS \to if \; CE \; then \; ES \; else \; ES \\
-& CE \to AE \; RO \; AE \\
-& RO \to < \mid <= \mid > \mid >= \mid = \mid <> \\
+& CS \to if \; CE \; then \; CB \; else \; CB \\
+& WS \to while(CE) \; CB \\
+& CE \to ES \; BARO \; ES \mid ULRO \; CE |  \\
+& BARO \to < \mid <= \mid > \mid >= \mid = \mid <> \\
+& ULRO \to ! \\
+& BLRO \to \And \mid | \\
 \end{align}
 $$
 
@@ -209,17 +240,24 @@ $$
 
 - `begin`: 程序/分程序开始符号
 - `end`: 程序/分程序结束符号
-- `integer`: 定义 integer 类型(变量/函数返回值)
-- `identifier`: 标识符
+- `;`: 一个变量/函数定义的结束
 - `function`: 定义函数
 - `(`: 参数(定义/传递)的开始
 - `)`: 参数(定义/传递)的结束
-- `;`: 一个变量/函数定义的结束
+- `integer`: 定义 integer 类型(变量/函数返回值)
+- `boolean`: 定义 boolean 类型(变量/函数返回值)
+- `float`: 定义 float 类型(变量/函数返回值)
+- `string`: 定义 string 类型(变量/函数返回值)
+- `identifier`: 标识符
+- `colon`: 逗号
 - `read`: 读取
 - `write`: 写入
+- `return`: 返回
 - `:=`: 赋值
-- `*`: 乘法
 - `-`: 减法
+- `+`: 加法
+- `*`: 乘法
+- `/`: 除法
 - `constant`: 常数
 - `if`: 条件语句中, 条件表达式开始
 - `then`: 条件语句中, 结果为真的执行语句开始
@@ -234,26 +272,30 @@ $$
 ##### 非终结符
 
 - `P`: 程序
-- `SP`: 分程序
+- `CB`: 代码块
 - `DST`: 说明语句表
 - `DS`: 说明语句
-- `VDorFDS`: 变量或函数说明后缀
-- `V`: 变量
-- `Id`: 标识符
-- `A`: 参数
-- `FB`: 函数体
+- `VDorFDS`: 变量或函数说明后缀(消除公共左因子)
+- `T`: 类型
+- `Id`: 标识符, 变量名称
+- `ADT`: 参数定义表
+- `ADTS`: 参数定义表(消除左递归)
+- `CB`: 函数体
 - `EST`: 执行语句表
 - `ES`: 执行语句
 - `RS`: 读语句
 - `WS`: 写语句
+- `RT`: 返回语句
 - `AS`: 赋值语句
 - `AE`: 算数表达式
-- `AE'`: 算数表达式(消除左递归)
+- `AES`: 算数表达式(消除左递归)
 - `I`: 项(乘法)
-- `I'`: 项(乘法)(消除左递归)
+- `IS`: 项(乘法)(消除左递归)
 - `F`: 因子
 - `VorFC`: 变量或者函数调用
-- `VorFCS`: 变量或者函数调用的后缀
+- `VorFCS`: 变量或者函数调用的后缀(消除公共左因子)
+- `AL`: 传递参数列表
+- `ALS`: 传递参数列表(消除左递归)
 - `C`: 常数
 - `CS`: 条件语句
 - `CE`: 条件表达式

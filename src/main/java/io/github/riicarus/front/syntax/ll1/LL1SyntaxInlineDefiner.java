@@ -1,11 +1,10 @@
 package io.github.riicarus.front.syntax.ll1;
 
-import io.github.riicarus.common.data.ast.ASTCreator;
-import io.github.riicarus.common.data.ast.NonterminalASTNode;
+import io.github.riicarus.common.data.ast.DetailedASTCreator;
+import io.github.riicarus.common.data.ast.detailed.NonterminalASTNode;
 import io.github.riicarus.common.util.CharUtil;
 import io.github.riicarus.front.syntax.SyntaxProduction;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
-import io.github.riicarus.front.syntax.SyntaxSymbolType;
 
 import java.util.*;
 
@@ -20,7 +19,7 @@ import static java.util.stream.Collectors.joining;
  */
 public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
 
-    private static final SyntaxSymbol END_SYMBOL = new LL1SyntaxSymbol(String.valueOf(CharUtil.LEX_SYNTAX_END), SyntaxSymbolType.ASST, true);
+    private static final SyntaxSymbol END_SYMBOL = new LL1SyntaxSymbol(String.valueOf(CharUtil.LEX_SYNTAX_END), true);
     private final SyntaxSymbol epsSymbol;
     private final SyntaxSymbol endSymbol;
     private final SyntaxSymbol startSymbol;
@@ -72,30 +71,23 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
         syntaxSymbolMap.put(startSymbol.getName(), startSymbol);
     }
 
-    public void addSymbols(Set<SyntaxSymbol> symbolList) {
-        symbolList.forEach(s -> syntaxSymbolMap.put(s.getName(), s));
-    }
-
-    public <T extends NonterminalASTNode> void addProduction(String head, List<String> body, ASTCreator<T> constructor) {
-        final SyntaxSymbol headSymbol = syntaxSymbolMap.get(head);
-        if (headSymbol == null) {
-            throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, can not find symbol: " + head);
+    public <T extends NonterminalASTNode> void addProduction(SyntaxSymbol lhs, List<SyntaxSymbol> rhs, DetailedASTCreator<T> constructor) {
+        if (lhs == null) {
+            throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, production's left hand size symbol can not be null.");
         }
-        if (headSymbol.isTerminal()) {
-            throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, head symbol can not be terminal: " + head);
+        if (lhs.isTerminal()) {
+            throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, production's left hand size symbol can not be terminal: " + lhs);
         }
 
-        List<SyntaxSymbol> bodySymbolList = new ArrayList<>();
-        for (String s : body) {
-            final SyntaxSymbol bodySymbol = syntaxSymbolMap.get(s);
-            if (bodySymbol == null) {
-                throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, can not find symbol: " + s);
-            }
-            bodySymbolList.add(bodySymbol);
+        if (rhs == null || rhs.isEmpty()) {
+            throw new IllegalStateException("Parse LL1Syntax definition failed: Syntax definition error, production's right hand size symbol list can not be null or empty.");
         }
 
-        productionMap.putIfAbsent(headSymbol, new HashSet<>());
-        productionMap.get(headSymbol).add(new LL1SyntaxProduction<>(headSymbol, bodySymbolList, constructor));
+        productionMap.putIfAbsent(lhs, new HashSet<>());
+        productionMap.get(lhs).add(new LL1SyntaxProduction<>(lhs, rhs, constructor));
+
+        syntaxSymbolMap.putIfAbsent(lhs.getName(), lhs);
+        rhs.forEach(s -> syntaxSymbolMap.putIfAbsent(s.getName(), s));
     }
 
     @Override
