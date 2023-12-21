@@ -4,7 +4,7 @@ import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 
 /**
  * <p>变量 AST 节点</p>
- * <p>包含各种变量, 如: integer, boolean, function .etc</p>
+ * <p>包含各种变量, 如: int, bool, function .etc</p>
  *
  * @author Riicarus
  * @create 2023-12-17 23:31
