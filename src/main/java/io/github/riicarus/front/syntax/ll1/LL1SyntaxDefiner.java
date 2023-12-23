@@ -70,10 +70,6 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
                 }
             }
         }
-
-        System.out.println();
-        System.out.println("NULLABLE:");
-        nullableSymbolSet.forEach(s -> System.out.println("\t" + s));
     }
 
     private void computeFirstSetMap() {
@@ -112,10 +108,6 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
                     hasNew |= firstSetMap.get(head).add(getEpsilonSymbol());
             }
         }
-
-        System.out.println();
-        System.out.println("FIRST:");
-        firstSetMap.forEach((k, v) -> System.out.println("\t" + k + ": " + v));
     }
 
     private void computeFollowSetMap() {
@@ -166,10 +158,6 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
                 }
             }
         }
-
-        System.out.println();
-        System.out.println("FOLLOW:");
-        followSetMap.forEach((k, v) -> System.out.println("\t" + k + ": " + v));
     }
 
     private void computeSelectSetMap() {
@@ -178,10 +166,6 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
 
             computeSelectSet(production);
         }
-
-        System.out.println();
-        System.out.println("SELECT:");
-        selectSetMap.forEach((k, v) -> System.out.println("\t" + k + ": " + v));
     }
 
     private void computeSelectSet(SyntaxProduction<?> production) {
@@ -214,16 +198,6 @@ public abstract class LL1SyntaxDefiner implements SyntaxDefiner {
                 LL1AnalyzeMap.get(head).get(symbol.getName()).add(production);
             }
         }
-
-        System.out.println();
-        System.out.println("LL1AnalyzeMap:");
-        LL1AnalyzeMap.forEach((t, setMap) ->
-                setMap.forEach((nt, pSet) -> {
-                            System.out.println("\t" + t.getName() + "--[" + nt + "]-->");
-                            pSet.forEach(p -> System.out.println("\t\t" + p));
-                        }
-                )
-        );
 
         List<String> invalidTransMapTipList = new ArrayList<>();
         for (Map.Entry<SyntaxSymbol, Map<String, Set<SyntaxProduction<?>>>> entry : LL1AnalyzeMap.entrySet()) {

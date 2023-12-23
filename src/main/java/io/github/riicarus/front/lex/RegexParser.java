@@ -134,8 +134,6 @@ public class RegexParser {
             }
         }
 
-        // System.out.println(infixBuilder);
-
         return infixBuilder.toString();
     }
 

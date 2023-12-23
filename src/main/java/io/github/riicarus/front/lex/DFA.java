@@ -209,8 +209,6 @@ public class DFA {
 
                 if (t.isEmpty()) continue;
 
-                // System.out.println(q + "--" + c + "-->: " + t);
-
                 // q --c--> t
                 DfaState fromState = dfa.getOrAddDefaultState(q, nfa);
                 DfaState toState = dfa.getOrAddDefaultState(t, nfa);
@@ -223,8 +221,6 @@ public class DFA {
                 }
             }
         }
-
-        // System.out.println(Q);
 
         for (DfaState dfaState : dfa.dfaStates) {
             if (dfaState.getState() == 0) dfa.startState = dfaState;

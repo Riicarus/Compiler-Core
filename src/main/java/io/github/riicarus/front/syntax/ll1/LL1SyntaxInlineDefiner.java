@@ -8,8 +8,6 @@ import io.github.riicarus.front.syntax.SyntaxSymbol;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.joining;
-
 /**
  * 内联定义 LL1 文法
  *
@@ -94,14 +92,6 @@ public class LL1SyntaxInlineDefiner extends LL1SyntaxDefiner {
     protected List<SyntaxProduction<?>> loadSyntaxProductions() {
         List<SyntaxProduction<?>> productionList = new ArrayList<>();
         productionMap.values().forEach(productionList::addAll);
-
-        System.out.println();
-        System.out.println("Production Load:");
-        productionMap.forEach((k, v) -> {
-            String sb = k.getName() + " --> " +
-                    v.stream().map(p -> p.getRHS().stream().map(SyntaxSymbol::getName).collect(joining(" "))).collect(joining(" | "));
-            System.out.println("\t" + sb);
-        });
 
         return productionList;
     }

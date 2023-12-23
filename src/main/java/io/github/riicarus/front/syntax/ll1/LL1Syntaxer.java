@@ -5,6 +5,7 @@ import io.github.riicarus.common.data.Token;
 import io.github.riicarus.common.data.ast.detailed.DetailedASTNode;
 import io.github.riicarus.common.data.ast.detailed.NonterminalASTNode;
 import io.github.riicarus.common.data.ast.detailed.TerminalASTNode;
+import io.github.riicarus.common.data.ast.generic.GenericASTNode;
 import io.github.riicarus.front.lex.LexicalSymbol;
 import io.github.riicarus.front.syntax.SyntaxDefiner;
 import io.github.riicarus.front.syntax.SyntaxProduction;
@@ -80,20 +81,14 @@ public class LL1Syntaxer implements Syntaxer {
 
     @Override
     public SyntaxParseResult parse(List<Token> tokenList, Set<LexicalSymbol> assistSet) {
+        long time = System.currentTimeMillis();
+        System.out.println();
+        System.out.println("LL1Syntax parsing...");
+
         reset(tokenList, assistSet);
 
         while (!checkEnds()) {
             SyntaxSymbol topSymbol = parseStack.peek();
-
-            System.out.println();
-            System.out.println("Parse Stack:");
-            parseStack.forEach(symbol -> System.out.println("\t" + symbol));
-            System.out.println("AST Stack:");
-            astStack.forEach(node -> System.out.println("\t" + node));
-            System.out.println("Top Symbol:");
-            System.out.println("\t" + topSymbol);
-            System.out.println("Cur Token:");
-            System.out.println("\t" + curToken());
 
             if (topSymbol.isTerminal()) {
                 Token token = null;
@@ -133,28 +128,24 @@ public class LL1Syntaxer implements Syntaxer {
                 for (int i = rhs.size() - 1; i >= 0; i--) {
                     parseStack.push(rhs.get(i));
                 }
-                System.out.println("Apply Production:");
-                System.out.println("\t" + production);
             } else {
                 throw new IllegalStateException("LL1Syntax error: not production found for symbol: " + topSymbol);
             }
         }
 
-        System.out.println();
-        System.out.println("Parse Stack:");
-        parseStack.forEach(symbol -> System.out.println("\t" + symbol));
-        System.out.println("AST Stack:");
-        astStack.forEach(node -> System.out.println("\t" + node));
-
         if (astStack.size() != 1) {
             throw new IllegalStateException("LL1Syntax error: ast stack should only have one element, but get: " + astStack);
         }
 
+        GenericASTNode node;
         try {
-            return new SyntaxParseResult(((NonterminalASTNode) astStack.pop()).toGeneric());
+            node = ((NonterminalASTNode) astStack.pop()).toGeneric();
         } catch (ClassCastException e) {
             throw new IllegalStateException("LL1Syntax error: ast stack should only have one non-terminal ast node, but get: " + astStack);
         }
+
+        System.out.println("LL1Syntax parse succeeded, time used: " + (System.currentTimeMillis() - time) + " ms.");
+        return new SyntaxParseResult(node);
     }
 
     private void reset(List<Token> tokenList, Set<LexicalSymbol> assistSet) {
