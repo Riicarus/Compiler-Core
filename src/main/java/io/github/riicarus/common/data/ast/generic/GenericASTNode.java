@@ -1,7 +1,6 @@
 package io.github.riicarus.common.data.ast.generic;
 
 import io.github.riicarus.common.data.ast.ASTNode;
-import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
 
 /**
  * 通用型 AST 节点
@@ -18,5 +17,4 @@ public abstract class GenericASTNode extends ASTNode {
         this.name = name;
     }
 
-    public abstract ValueType getReturnType();
 }

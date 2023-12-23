@@ -1,6 +1,7 @@
 package io.github.riicarus.common.data.ast.generic.expr.v;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
+import io.github.riicarus.common.data.ast.generic.type.TypeNode;
 
 /**
  * <p>变量 AST 节点</p>
@@ -13,12 +14,11 @@ import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 public class VariableNode extends ExprNode {
 
     protected final String varName;
-    protected final ValueType type;
+    protected TypeNode typeNode;
 
-    public VariableNode(String varName, ValueType type) {
+    public VariableNode(String varName) {
         super("Var");
         this.varName = varName;
-        this.type = type;
     }
 
     @Override
@@ -31,18 +31,24 @@ public class VariableNode extends ExprNode {
             sb.append("\r\n");
         }
 
-        // like: Var <Type>(VarName), eg: Var <Func>(FuncName)
+        // like: Var (VarName)
         sb.append(prefix).append(t).append(link)
                 .append(name)
-                .append(" <").append(type).append(">")
-                .append("(").append(varName).append(")");
+                .append("(").append(varName).append(")")
+                .append(typeNode == null ? "" : typeNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
-    @Override
-    public final ValueType getReturnType() {
-        return type;
+    public String getVarName() {
+        return varName;
     }
 
+    public TypeNode getTypeNode() {
+        return typeNode;
+    }
+
+    public void setTypeNode(TypeNode typeNode) {
+        this.typeNode = typeNode;
+    }
 }

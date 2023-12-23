@@ -1,9 +1,6 @@
 package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
-import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
-
-import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.VOID;
 
 /**
  * if AST 节点
@@ -14,17 +11,15 @@ import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.VOID;
  */
 public class IfNode extends ExprNode {
 
-    private static final ValueType TYPE = VOID;
-
     private final IfConditionNode condition;
     private final ThenNode then;
     private final ElseNode _else;
 
-    public IfNode(IfConditionNode condition, ThenNode then, ElseNode anElse) {
-        super("if");
+    public IfNode(IfConditionNode condition, ThenNode then, ElseNode _else) {
+        super("If");
         this.condition = condition;
         this.then = then;
-        _else = anElse;
+        this._else = _else;
     }
 
     @Override
@@ -37,19 +32,13 @@ public class IfNode extends ExprNode {
             sb.append("\r\n");
         }
 
-        // like: if <VOID>
-        sb.append(prefix).append(t).append(link)
-                .append(name)
-                .append(" <").append(TYPE).append(">")
-                .append(condition.toTreeString(level + 1, prefix))
-                .append(then.toTreeString(level + 1, prefix))
-                .append(_else.toTreeString(level + 1, prefix));
+        // like: if
+        sb.append(prefix).append(t).append(link).append(name)
+                .append(condition == null ? "" : condition.toTreeString(level + 1, prefix))
+                .append(then == null ? "" : then.toTreeString(level + 1, prefix))
+                .append(_else == null ? "" : _else.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
-    @Override
-    public final ValueType getReturnType() {
-        return TYPE;
-    }
 }

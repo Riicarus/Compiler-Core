@@ -1,5 +1,6 @@
 package io.github.riicarus.common.data.ast.detailed;
 
+import io.github.riicarus.common.data.Token;
 import io.github.riicarus.front.syntax.SyntaxSymbol;
 
 /**
@@ -11,10 +12,14 @@ import io.github.riicarus.front.syntax.SyntaxSymbol;
  */
 public class TerminalASTNode extends DetailedASTNode {
 
-    private TerminalASTNode() {
+    protected final Token token;
+
+    private TerminalASTNode(Token token) {
+        this.token = token;
     }
 
-    public TerminalASTNode(SyntaxSymbol symbol) {
+    public TerminalASTNode(Token token, SyntaxSymbol symbol) {
+        this.token = token;
         this.symbol = symbol;
     }
 
@@ -28,8 +33,13 @@ public class TerminalASTNode extends DetailedASTNode {
             sb.append("\r\n");
         }
 
-        sb.append(prefix).append(t).append(link).append(symbol);
+        // like: identifier: token
+        sb.append(prefix).append(t).append(link).append(symbol).append(": ").append(token);
 
         return sb.toString();
+    }
+
+    public Token getToken() {
+        return token;
     }
 }

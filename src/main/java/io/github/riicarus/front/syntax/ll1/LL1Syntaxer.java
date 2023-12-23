@@ -3,6 +3,7 @@ package io.github.riicarus.front.syntax.ll1;
 import io.github.riicarus.common.data.SyntaxParseResult;
 import io.github.riicarus.common.data.Token;
 import io.github.riicarus.common.data.ast.detailed.DetailedASTNode;
+import io.github.riicarus.common.data.ast.detailed.NonterminalASTNode;
 import io.github.riicarus.common.data.ast.detailed.TerminalASTNode;
 import io.github.riicarus.front.lex.LexicalSymbol;
 import io.github.riicarus.front.syntax.SyntaxDefiner;
@@ -95,17 +96,19 @@ public class LL1Syntaxer implements Syntaxer {
             System.out.println("\t" + curToken());
 
             if (topSymbol.isTerminal()) {
+                Token token = null;
                 if (topSymbol.equals(definer.getEpsilonSymbol())) {
                     parseStack.pop();
                 } else if (topSymbol.getName().equals(curToken().getSymbol().getName())) {
                     parseStack.pop();
+                    token = curToken();
                     nextTokenIgnoreAssistant();
                 } else {
-                    throw new IllegalStateException("LL1Syntax wrong: terminal symbol not match, want: " + topSymbol + ", but get: " + curToken());
+                    throw new IllegalStateException("LL1Syntax error: terminal symbol not match, want: " + topSymbol + ", but get: " + curToken());
                 }
 
                 if (!topSymbol.equals(definer.getEndSymbol())) {
-                    astStack.push(new TerminalASTNode(topSymbol));
+                    astStack.push(new TerminalASTNode(token, topSymbol));
                 }
                 continue;
             }
@@ -133,7 +136,7 @@ public class LL1Syntaxer implements Syntaxer {
                 System.out.println("Apply Production:");
                 System.out.println("\t" + production);
             } else {
-                throw new IllegalStateException("LL1Syntax wrong: not production found for symbol: " + topSymbol);
+                throw new IllegalStateException("LL1Syntax error: not production found for symbol: " + topSymbol);
             }
         }
 
@@ -144,10 +147,14 @@ public class LL1Syntaxer implements Syntaxer {
         astStack.forEach(node -> System.out.println("\t" + node));
 
         if (astStack.size() != 1) {
-            throw new IllegalStateException("LL1Syntax wrong: ast stack should only have one element, but get: " + astStack);
+            throw new IllegalStateException("LL1Syntax error: ast stack should only have one element, but get: " + astStack);
         }
 
-        return new SyntaxParseResult(astStack.pop());
+        try {
+            return new SyntaxParseResult(((NonterminalASTNode) astStack.pop()).toGeneric());
+        } catch (ClassCastException e) {
+            throw new IllegalStateException("LL1Syntax error: ast stack should only have one non-terminal ast node, but get: " + astStack);
+        }
     }
 
     private void reset(List<Token> tokenList, Set<LexicalSymbol> assistSet) {
@@ -212,13 +219,13 @@ public class LL1Syntaxer implements Syntaxer {
         SyntaxSymbol topSymbol = parseStack.peek();
         if (topSymbol.equals(definer.getEndSymbol())) {
             if (tokenEnds())  // 如果 tokens 已经遍历完, 报错
-                throw new IllegalStateException("LL1Syntax wrong: syntax not complete, want: \"" + topSymbol + "\" but get null.");
+                throw new IllegalStateException("LL1Syntax error: syntax not complete, want: \"" + topSymbol + "\" but get null.");
             else {
                 if (curToken().getSymbol().getName().equals(definer.getEndSymbol().getName())) {  // 如果 tokens 也是结束符号, 就直接消去
                     parseStack.pop();
                     return true;
                 } else    // 否则报错
-                    throw new IllegalStateException("LL1Syntax wrong: syntax complete, but get \"" + topSymbol + "\".");
+                    throw new IllegalStateException("LL1Syntax error: syntax complete, but get \"" + topSymbol + "\".");
             }
         }
 

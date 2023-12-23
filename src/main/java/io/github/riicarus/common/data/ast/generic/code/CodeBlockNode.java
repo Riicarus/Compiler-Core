@@ -1,12 +1,9 @@
-package io.github.riicarus.common.data.ast.generic.block;
+package io.github.riicarus.common.data.ast.generic.code;
 
 import io.github.riicarus.common.data.ast.generic.GenericASTNode;
-import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.VOID;
 
 /**
  * 代码块 AST 节点
@@ -17,12 +14,15 @@ import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.VOID;
  */
 public class CodeBlockNode extends GenericASTNode {
 
-    protected static final ValueType TYPE = VOID;
-    protected final List<GenericASTNode> codes = new ArrayList<>();
+    protected final List<StatementNode> statementList = new ArrayList<>();
 
-    public CodeBlockNode(List<GenericASTNode> codes) {
+    public CodeBlockNode(List<StatementNode> statementList) {
         super("CodeBlock");
-        this.codes.addAll(codes);
+        this.statementList.addAll(statementList);
+    }
+
+    public CodeBlockNode() {
+        super("CodeBlock");
     }
 
     @Override
@@ -37,13 +37,16 @@ public class CodeBlockNode extends GenericASTNode {
 
         // like: CodeBlock
         sb.append(prefix).append(t).append(link).append(name);
-        codes.forEach(n -> sb.append(n.toTreeString(level + 1, prefix)));
+        statementList.forEach(n -> sb.append(n.toTreeString(level + 1, prefix)));
 
         return sb.toString();
     }
 
-    @Override
-    public ValueType getReturnType() {
-        return TYPE;
+    public void addStatement(StatementNode statementNode) {
+        statementList.add(statementNode);
+    }
+
+    public List<StatementNode> getStatementList() {
+        return statementList;
     }
 }

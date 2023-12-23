@@ -3,23 +3,23 @@ package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 
 /**
- * if 条件语句 AST 节点
+ * For Condition AST 节点
  *
  * @author Riicarus
- * @create 2023-12-18 0:46
+ * @create 2023-12-23 6:35
  * @since 1.0.0
  */
-public class IfConditionNode extends ExprNode {
+public class ForConditionNode extends ExprNode {
 
-    private final ExprNode condition;
+    private final ExprNode exprNode;
 
-    public IfConditionNode(ExprNode condition) {
-        super("Condition");
-        this.condition = condition;
+    public ForConditionNode(ExprNode exprNode) {
+        super("ForCondition");
+        this.exprNode = exprNode;
     }
 
     @Override
-    public final String toTreeString(int level, String prefix) {
+    public String toTreeString(int level, String prefix) {
         StringBuilder sb = new StringBuilder();
         String t = "\t".repeat(Math.max(0, level - 1));
         String link = level == 0 ? "" : "|--- ";
@@ -28,11 +28,9 @@ public class IfConditionNode extends ExprNode {
             sb.append("\r\n");
         }
 
-        // like: condition
         sb.append(prefix).append(t).append(link).append(name)
-                .append(condition == null ? "" : condition.toTreeString(level + 1, prefix));
+                .append(exprNode == null ? "" : exprNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
-
 }

@@ -1,6 +1,7 @@
 package io.github.riicarus.common.data.ast.generic.expr.v;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
+import io.github.riicarus.common.data.ast.generic.type.TypeNode;
 
 /**
  * 值 AST 节点
@@ -12,9 +13,14 @@ import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 public class ValueNode extends ExprNode {
 
     protected final String value;
-    protected final ValueType type;
+    protected TypeNode type;
 
-    public ValueNode(String value, ValueType type) {
+    public ValueNode(String value) {
+        super("Val");
+        this.value = value;
+    }
+
+    public ValueNode(String value, TypeNode type) {
         super("Val");
         this.value = value;
         this.type = type;
@@ -30,17 +36,11 @@ public class ValueNode extends ExprNode {
             sb.append("\r\n");
         }
 
-        // like: Val <INT>(1)
-        sb.append(prefix).append(t).append(link)
-                .append(name)
-                .append("<").append(type).append(">")
-                .append("(").append(value).append(")");
+        // like: Val (1)
+        sb.append(prefix).append(t).append(link).append(name)
+                .append("(").append(value).append(")")
+                .append(type == null ? "" : type.toTreeString(level + 1, prefix));
 
         return sb.toString();
-    }
-
-    @Override
-    public final ValueType getReturnType() {
-        return type;
     }
 }

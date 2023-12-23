@@ -1,12 +1,7 @@
 package io.github.riicarus.common.data.ast.generic.expr.op.compute;
 
-import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 import io.github.riicarus.common.data.ast.generic.expr.op.abstruct.BinaryOpNode;
-import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
 import io.github.riicarus.common.data.ast.generic.expr.v.VariableNode;
-
-import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.INTEGER;
-import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.VOID;
 
 /**
  * <p>赋值 AST 节点</p>
@@ -19,17 +14,18 @@ import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.VOID;
  * @since 1.0.0
  */
 public class AssignNode extends BinaryOpNode {
-    protected AssignNode(ValueType leftOperandType, ValueType rightOperandType,
-                         VariableNode leftOperand, ExprNode rightOperand) {
-        super(
-                ":=",
-                leftOperandType, rightOperandType,
-                VOID,
-                leftOperand, rightOperand
-        );
+
+    public AssignNode() {
+        super(":=");
     }
 
-    public AssignNode newIntegerTypeInstance(VariableNode leftOperand, ExprNode rightOperand) {
-        return new AssignNode(INTEGER, INTEGER, leftOperand, rightOperand);
+    @Override
+    public VariableNode getLeftOperand() {
+        try {
+            return (VariableNode) super.getLeftOperand();
+        } catch (ClassCastException e) {
+            throw new IllegalStateException("LL1Syntax error, can not cast node into correct typeNode, need typeNode: VariableNode, but get node: " + getLeftOperand());
+        }
     }
+
 }

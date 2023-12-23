@@ -1,7 +1,6 @@
 package io.github.riicarus.common.data.ast.generic.expr.op.abstruct;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
-import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
 
 /**
  * 一元运算符 AST 节点
@@ -12,15 +11,15 @@ import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
  */
 public abstract class UnaryOpNode extends OpNode {
 
-    protected final ValueType operandType;
-    protected final ValueType returnType;
-    protected final ExprNode operand;
+    protected ExprNode operand;
 
-    public UnaryOpNode(String name, ValueType operandType, ValueType returnType, ExprNode operand) {
+    public UnaryOpNode(String name, ExprNode operand) {
         super(name);
-        this.operandType = operandType;
-        this.returnType = returnType;
         this.operand = operand;
+    }
+
+    public UnaryOpNode(String name) {
+        super(name);
     }
 
     @Override
@@ -33,17 +32,11 @@ public abstract class UnaryOpNode extends OpNode {
             sb.append("\r\n");
         }
 
-        // like: ! <OperandType -> ReturnType>
-        sb.append(prefix).append(t).append(link)
-                .append(name)
-                .append(" <").append(operandType).append(" -> ").append(returnType).append(">")
-                .append(operand.toTreeString(level + 1, prefix));
+        // like: !
+        sb.append(prefix).append(t).append(link).append(name)
+                .append(operand == null ? "" : operand.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
-    @Override
-    public final ValueType getReturnType() {
-        return returnType;
-    }
 }

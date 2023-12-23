@@ -1,7 +1,6 @@
 package io.github.riicarus.common.data.ast.generic.expr.op.abstruct;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
-import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
 
 /**
  * 二元运算符 AST 节点
@@ -12,24 +11,20 @@ import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
  */
 public abstract class BinaryOpNode extends OpNode {
 
-    protected final ValueType leftOperandType;
-    protected final ValueType rightOperandType;
-    protected final ValueType returnType;
-
-    protected final ExprNode leftOperand;
-    protected final ExprNode rightOperand;
+    protected ExprNode leftOperand;
+    protected ExprNode rightOperand;
+    protected BinaryOpNode topOpNode = this;
 
     public BinaryOpNode(String name,
-                        ValueType leftOperandType, ValueType rightOperandType,
-                        ValueType returnType,
                         ExprNode leftOperand, ExprNode rightOperand) {
         super(name);
-        this.leftOperandType = leftOperandType;
-        this.rightOperandType = rightOperandType;
-        this.returnType = returnType;
 
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
+    }
+
+    public BinaryOpNode(String name) {
+        super(name);
     }
 
     @Override
@@ -42,21 +37,35 @@ public abstract class BinaryOpNode extends OpNode {
             sb.append("\r\n");
         }
 
-        // like: := <LeftOperandType, RightOperandType -> ReturnType>
-        sb.append(prefix).append(t).append(link)
-                .append(name)
-                .append(" <")
-                .append(leftOperandType).append(", ").append(rightOperandType)
-                .append(" -> ").append(returnType)
-                .append(">")
-                .append(leftOperand.toTreeString(level + 1, prefix))
-                .append(rightOperand.toTreeString(level + 1, prefix));
+        // like: :=
+        sb.append(prefix).append(t).append(link).append(name)
+                .append(leftOperand == null ? "" : leftOperand.toTreeString(level + 1, prefix))
+                .append(rightOperand == null ? "" : rightOperand.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
-    @Override
-    public final ValueType getReturnType() {
-        return returnType;
+    public ExprNode getLeftOperand() {
+        return leftOperand;
+    }
+
+    public void setLeftOperand(ExprNode leftOperand) {
+        this.leftOperand = leftOperand;
+    }
+
+    public ExprNode getRightOperand() {
+        return rightOperand;
+    }
+
+    public void setRightOperand(ExprNode rightOperand) {
+        this.rightOperand = rightOperand;
+    }
+
+    public BinaryOpNode getTopOpNode() {
+        return topOpNode;
+    }
+
+    public void setTopOpNode(BinaryOpNode topOpNode) {
+        this.topOpNode = topOpNode;
     }
 }

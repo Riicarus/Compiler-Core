@@ -27,5 +27,5 @@ public abstract class NonterminalASTNode extends DetailedASTNode {
      *
      * @return 简化后的通用型 AST 节点
      */
-    public abstract GenericASTNode simplify();
+    public abstract GenericASTNode toGeneric();
 }

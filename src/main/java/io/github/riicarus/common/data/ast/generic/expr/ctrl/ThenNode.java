@@ -1,10 +1,7 @@
 package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
-import io.github.riicarus.common.data.ast.generic.block.CodeBlockNode;
+import io.github.riicarus.common.data.ast.generic.code.CodeBlockNode;
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
-import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
-
-import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.VOID;
 
 /**
  * then 跟随的执行语句 AST 节点
@@ -15,11 +12,10 @@ import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.VOID;
  */
 public class ThenNode extends ExprNode {
 
-    private static final ValueType TYPE = VOID;
     private final CodeBlockNode code;
 
     public ThenNode(CodeBlockNode code) {
-        super("then");
+        super("Then");
         this.code = code;
     }
 
@@ -33,17 +29,11 @@ public class ThenNode extends ExprNode {
             sb.append("\r\n");
         }
 
-        // like: then <VOID>
-        sb.append(prefix).append(t).append(link)
-                .append(name)
-                .append(" <").append(TYPE).append(">")
-                .append(code.toTreeString(level + 1, prefix));
+        // like: then
+        sb.append(prefix).append(t).append(link).append(name)
+                .append(code == null ? "" : code.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
-    @Override
-    public final ValueType getReturnType() {
-        return TYPE;
-    }
 }

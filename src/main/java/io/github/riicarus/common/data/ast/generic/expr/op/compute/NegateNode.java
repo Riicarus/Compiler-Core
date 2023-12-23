@@ -2,9 +2,6 @@ package io.github.riicarus.common.data.ast.generic.expr.op.compute;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 import io.github.riicarus.common.data.ast.generic.expr.op.abstruct.UnaryOpNode;
-import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
-
-import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.BOOLEAN;
 
 /**
  * 取反 AST 节点
@@ -15,12 +12,11 @@ import static io.github.riicarus.common.data.ast.generic.expr.v.ValueType.BOOLEA
  */
 public class NegateNode extends UnaryOpNode {
 
-    protected NegateNode(ValueType operandType, ValueType returnType, ExprNode operand) {
-        super("!", operandType, returnType, operand);
+    public NegateNode() {
+        super("!");
     }
 
-    public NegateNode newBooleanTypeInstance(ExprNode operand) {
-        return new NegateNode(BOOLEAN, BOOLEAN, operand);
+    public NegateNode(ExprNode operand) {
+        super("!", operand);
     }
-
 }

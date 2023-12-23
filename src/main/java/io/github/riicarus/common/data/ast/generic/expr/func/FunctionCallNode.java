@@ -1,14 +1,15 @@
 package io.github.riicarus.common.data.ast.generic.expr.func;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
-import io.github.riicarus.common.data.ast.generic.expr.v.ValueType;
+import io.github.riicarus.common.data.ast.generic.expr.v.VariableNode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * <p>函数调用 AST 节点</p>
  * <p>根据函数名称和参数列表调用函数, 包括以下内容:</p>
- * <li>函数名称--String</li>
+ * <li>函数名称--VariableNode</li>
  * <li>参数列表--List&lt;ExprNode&gt;</li>
  * </br>
  * <p>函数调用的返回值由函数名称和参数列表共同决定, 在符号表中找到对应的函数定义, 然后返回返回值</p>
@@ -19,13 +20,11 @@ import java.util.List;
  */
 public class FunctionCallNode extends ExprNode {
 
-    protected final String funcName;
-    protected final List<ExprNode> args;
+    protected VariableNode funcId;
+    protected final List<ExprNode> args = new ArrayList<>();
 
-    public FunctionCallNode(String funcName, List<ExprNode> args) {
+    public FunctionCallNode() {
         super("FuncCall");
-        this.funcName = funcName;
-        this.args = args;
     }
 
     @Override
@@ -38,19 +37,27 @@ public class FunctionCallNode extends ExprNode {
             sb.append("\r\n");
         }
 
-        // like: FuncCall <ReturnType>(FuncName)
-        sb.append(prefix).append(t).append(link)
-                .append(name)
-                .append(" <").append(getReturnType()).append(">")
-                .append("(").append(funcName).append(")");
+        // like: FuncCall
+        sb.append(prefix).append(t).append(link).append(name)
+                .append(funcId == null ? "" : funcId.toTreeString(level + 1, prefix));
         args.forEach(n -> sb.append(n.toTreeString(level + 1, prefix)));
 
         return sb.toString();
     }
 
-    @Override
-    public ValueType getReturnType() {
-        // TODO: 从符号表中找到函数原型, 获取返回类型
-        return null;
+    public VariableNode getFuncId() {
+        return funcId;
+    }
+
+    public void setFuncId(VariableNode funcId) {
+        this.funcId = funcId;
+    }
+
+    public void addArg(ExprNode arg) {
+        args.add(0, arg);
+    }
+
+    public List<ExprNode> getArgs() {
+        return args;
     }
 }
