@@ -1,6 +1,9 @@
 package io.github.riicarus.common.data.ast.generic.code;
 
 import io.github.riicarus.common.data.ast.generic.GenericASTNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * 语句 AST 节点
@@ -34,6 +37,13 @@ public class StatementNode extends GenericASTNode {
                 .append(curNode == null ? "" : curNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
+    }
+
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        if (curNode != null) {
+            curNode.updateTable(vt, pt, scopeName, kind, level);
+        }
     }
 
     public GenericASTNode getCurNode() {

@@ -1,7 +1,11 @@
-package io.github.riicarus.common.data.ast.generic.type;
+package io.github.riicarus.common.data.ast.generic;
 
 import io.github.riicarus.common.data.ast.generic.code.CodeBlockNode;
 import io.github.riicarus.common.data.ast.generic.expr.v.VariableNode;
+import io.github.riicarus.common.data.ast.generic.type.TypeNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +21,7 @@ import java.util.List;
  * @create 2023-12-18 16:34
  * @since 1.0.0
  */
-public class ProtoTypeNode extends TypeNode {
+public class ProtoTypeNode extends GenericASTNode {
 
     protected final List<VariableNode> argNodeList = new ArrayList<>();
     protected CodeBlockNode body;
@@ -68,5 +72,12 @@ public class ProtoTypeNode extends TypeNode {
 
     public void setReturnType(TypeNode returnType) {
         this.returnType = returnType;
+    }
+
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        argNodeList.forEach(n -> n.updateTable(vt, pt, scopeName, VarKind.PARAMETER, level));
+        body.updateTable(vt, pt, scopeName + "#" + CodeBlockNode.genCodeBlockName(name), VarKind.VARIABLE, level);
+        returnType.updateTable(vt, pt, scopeName, kind, level);
     }
 }

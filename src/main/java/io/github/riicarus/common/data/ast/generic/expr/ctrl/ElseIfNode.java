@@ -2,6 +2,9 @@ package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.code.CodeBlockNode;
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * else if AST 节点
@@ -34,6 +37,17 @@ public class ElseIfNode extends ExprNode {
                 .append(codeBlockNode == null ? "" : codeBlockNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
+    }
+
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        if (conditionNode != null) {
+            conditionNode.updateTable(vt, pt, scopeName, kind, level);
+        }
+
+        if (codeBlockNode != null) {
+            codeBlockNode.updateTable(vt, pt, scopeName + "#" + CodeBlockNode.genCodeBlockName(name), kind, level);
+        }
     }
 
     public ExprNode getConditionNode() {

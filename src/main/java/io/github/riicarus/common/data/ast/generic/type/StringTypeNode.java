@@ -1,5 +1,7 @@
 package io.github.riicarus.common.data.ast.generic.type;
 
+import io.github.riicarus.common.data.table.type.StringType;
+
 /**
  * String 类型 AST 节点
  *
@@ -33,5 +35,10 @@ public class StringTypeNode extends TypeNode {
         sb.append(prefix).append(t).append(link).append(name);
 
         return sb.toString();
+    }
+
+    @Override
+    public StringType getVarType() {
+        return StringType.getInstance();
     }
 }

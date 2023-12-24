@@ -2,6 +2,9 @@ package io.github.riicarus.common.data.ast.generic.expr.func;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 import io.github.riicarus.common.data.ast.generic.expr.v.VariableNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +46,15 @@ public class FunctionCallNode extends ExprNode {
         args.forEach(n -> sb.append(n.toTreeString(level + 1, prefix)));
 
         return sb.toString();
+    }
+
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        if (funcId != null) {
+            funcId.updateTable(vt, pt, scopeName, kind, level);
+        }
+
+        args.forEach(n -> n.updateTable(vt, pt, scopeName, kind, level));
     }
 
     public VariableNode getFuncId() {

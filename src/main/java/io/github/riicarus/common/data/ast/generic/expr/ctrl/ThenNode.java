@@ -2,6 +2,9 @@ package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.code.CodeBlockNode;
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * then 跟随的执行语句 AST 节点
@@ -12,11 +15,11 @@ import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
  */
 public class ThenNode extends ExprNode {
 
-    private final CodeBlockNode code;
+    private final CodeBlockNode codeBlockNode;
 
-    public ThenNode(CodeBlockNode code) {
+    public ThenNode(CodeBlockNode codeBlockNode) {
         super("Then");
-        this.code = code;
+        this.codeBlockNode = codeBlockNode;
     }
 
     @Override
@@ -31,9 +34,15 @@ public class ThenNode extends ExprNode {
 
         // like: then
         sb.append(prefix).append(t).append(link).append(name)
-                .append(code == null ? "" : code.toTreeString(level + 1, prefix));
+                .append(codeBlockNode == null ? "" : codeBlockNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        if (codeBlockNode != null) {
+            codeBlockNode.updateTable(vt, pt, scopeName + "#" + CodeBlockNode.genCodeBlockName(name), kind, level);
+        }
+    }
 }

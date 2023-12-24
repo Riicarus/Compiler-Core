@@ -1,9 +1,14 @@
 package io.github.riicarus.common.data.ast.generic.expr.func;
 
-import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
+import io.github.riicarus.common.data.ast.generic.ProtoTypeNode;
+import io.github.riicarus.common.data.ast.generic.code.CodeBlockNode;
 import io.github.riicarus.common.data.ast.generic.expr.v.VariableNode;
-import io.github.riicarus.common.data.ast.generic.type.ProtoTypeNode;
 import io.github.riicarus.common.data.ast.generic.type.TypeNode;
+import io.github.riicarus.common.data.table.*;
+import io.github.riicarus.common.data.table.type.FuncType;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * 函数 AST 节点
@@ -12,13 +17,22 @@ import io.github.riicarus.common.data.ast.generic.type.TypeNode;
  * @create 2023-12-23 5:17
  * @since 1.0.0
  */
-public class FunctionNode extends ExprNode {
+public class FunctionNode extends VariableNode {
 
-    private VariableNode varNode;
+    private static final AtomicInteger ANONYMOUS_FUNC_ID_GEN = new AtomicInteger(0);
+
     private ProtoTypeNode protoTypeNode;
 
+    public FunctionNode(String varName) {
+        super(varName);
+    }
+
+    public FunctionNode(VariableNode variableNode) {
+        super(variableNode.getVarName());
+    }
+
     public FunctionNode() {
-        super("Function");
+        super("ANONYMOUS_FUNC_" + ANONYMOUS_FUNC_ID_GEN.getAndIncrement());
     }
 
     @Override
@@ -31,19 +45,33 @@ public class FunctionNode extends ExprNode {
             sb.append("\r\n");
         }
 
+        // like: Var (VarName)
         sb.append(prefix).append(t).append(link).append(name)
-                .append(varNode == null ? "" : varNode.toTreeString(level + 1, prefix))
+                .append("(").append(varName).append(")")
                 .append(protoTypeNode == null ? "" : protoTypeNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
-    public VariableNode getVarNode() {
-        return varNode;
-    }
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        if (protoTypeNode != null) {
+            FuncType funcType = new FuncType();
+            funcType.setReturnType(protoTypeNode.getReturnType().getVarType());
+            protoTypeNode.getArgNodeList().forEach(n -> funcType.addArgType(n.getTypeNode().getVarType()));
+            VariableInfo variableInfo = new VariableInfo(varName, scopeName, kind,
+                    funcType, level);
+            vt.addVariable(variableInfo);
 
-    public void setVarNode(VariableNode varNode) {
-        this.varNode = varNode;
+            ProcedureInfo procedureInfo = new ProcedureInfo(varName,
+                    protoTypeNode.getReturnType().getVarType(), level,
+                    protoTypeNode.getArgNodeList().stream()
+                            .map(n -> new ProcedureInfo.ArgEntry(n.getVarName(), n.getTypeNode().getVarType()))
+                            .collect(Collectors.toList()));
+            pt.addProcedure(procedureInfo);
+
+            protoTypeNode.updateTable(vt, pt, scopeName + "#" + CodeBlockNode.genCodeBlockName(varName), VarKind.VARIABLE, level);
+        }
     }
 
     public ProtoTypeNode getProtoTypeNode() {

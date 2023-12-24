@@ -2,6 +2,9 @@ package io.github.riicarus.common.data.ast.generic.expr.v;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 import io.github.riicarus.common.data.ast.generic.type.TypeNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * 值 AST 节点
@@ -13,17 +16,17 @@ import io.github.riicarus.common.data.ast.generic.type.TypeNode;
 public class ValueNode extends ExprNode {
 
     protected final String value;
-    protected TypeNode type;
+    protected TypeNode typeNode;
 
     public ValueNode(String value) {
         super("Val");
         this.value = value;
     }
 
-    public ValueNode(String value, TypeNode type) {
+    public ValueNode(String value, TypeNode typeNode) {
         super("Val");
         this.value = value;
-        this.type = type;
+        this.typeNode = typeNode;
     }
 
     @Override
@@ -39,8 +42,15 @@ public class ValueNode extends ExprNode {
         // like: Val (1)
         sb.append(prefix).append(t).append(link).append(name)
                 .append("(").append(value).append(")")
-                .append(type == null ? "" : type.toTreeString(level + 1, prefix));
+                .append(typeNode == null ? "" : typeNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
+    }
+
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        if (typeNode != null) {
+            typeNode.updateTable(vt, pt, scopeName, kind, level);
+        }
     }
 }

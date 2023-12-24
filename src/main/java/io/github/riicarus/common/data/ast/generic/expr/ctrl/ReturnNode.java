@@ -1,6 +1,9 @@
 package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * 返回语句 AST 节点
@@ -39,4 +42,10 @@ public class ReturnNode extends ExprNode {
         return sb.toString();
     }
 
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        if (retValue != null) {
+            retValue.updateTable(vt, pt, scopeName, kind, level);
+        }
+    }
 }

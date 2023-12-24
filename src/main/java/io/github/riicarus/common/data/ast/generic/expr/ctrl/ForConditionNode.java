@@ -1,6 +1,9 @@
 package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * For Condition AST 节点
@@ -32,5 +35,12 @@ public class ForConditionNode extends ExprNode {
                 .append(exprNode == null ? "" : exprNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
+    }
+
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        if (exprNode != null) {
+            exprNode.updateTable(vt, pt, scopeName, kind, level);
+        }
     }
 }

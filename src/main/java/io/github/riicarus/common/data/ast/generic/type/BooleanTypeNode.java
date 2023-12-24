@@ -1,5 +1,7 @@
 package io.github.riicarus.common.data.ast.generic.type;
 
+import io.github.riicarus.common.data.table.type.BooleanType;
+
 /**
  * Boolean 类型 AST 节点
  *
@@ -33,5 +35,10 @@ public class BooleanTypeNode extends TypeNode {
         sb.append(prefix).append(t).append(link).append(name);
 
         return sb.toString();
+    }
+
+    @Override
+    public BooleanType getVarType() {
+        return BooleanType.getInstance();
     }
 }

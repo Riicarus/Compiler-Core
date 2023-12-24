@@ -2,6 +2,9 @@ package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 import io.github.riicarus.common.data.ast.generic.expr.op.compute.AssignNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,11 @@ public class ForUpdateNode extends ExprNode {
         updateList.forEach(n -> sb.append(n.toTreeString(level + 1, prefix)));
 
         return sb.toString();
+    }
+
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        updateList.forEach(n -> n.updateTable(vt, pt, scopeName, kind, level));
     }
 
     public void addUpdate(AssignNode updateNode) {

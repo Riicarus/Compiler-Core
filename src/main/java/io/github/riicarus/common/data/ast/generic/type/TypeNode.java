@@ -1,6 +1,10 @@
 package io.github.riicarus.common.data.ast.generic.type;
 
 import io.github.riicarus.common.data.ast.generic.GenericASTNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
+import io.github.riicarus.common.data.table.type.VarType;
 
 /**
  * 类型定义节点
@@ -14,5 +18,9 @@ public abstract class TypeNode extends GenericASTNode {
         super(name);
     }
 
+    public abstract VarType getVarType();
 
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+    }
 }

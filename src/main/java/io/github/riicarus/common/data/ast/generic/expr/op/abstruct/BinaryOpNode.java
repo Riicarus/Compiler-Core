@@ -1,6 +1,9 @@
 package io.github.riicarus.common.data.ast.generic.expr.op.abstruct;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * 二元运算符 AST 节点
@@ -43,6 +46,17 @@ public abstract class BinaryOpNode extends OpNode {
                 .append(rightOperand == null ? "" : rightOperand.toTreeString(level + 1, prefix));
 
         return sb.toString();
+    }
+
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        if (leftOperand != null) {
+            leftOperand.updateTable(vt, pt, scopeName, kind, level);
+        }
+
+        if (rightOperand != null) {
+            rightOperand.updateTable(vt, pt, scopeName, kind, level);
+        }
     }
 
     public ExprNode getLeftOperand() {

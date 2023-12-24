@@ -1,6 +1,9 @@
 package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
+import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.VarKind;
+import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * if AST 节点
@@ -41,4 +44,17 @@ public class IfNode extends ExprNode {
         return sb.toString();
     }
 
+    @Override
+    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+        // if 主干语句本身不增加层数, 只有其中的 codeBlock 增加层数.
+        if (condition != null) {
+            condition.updateTable(vt, pt, scopeName, kind, level);
+        }
+        if (then != null) {
+            then.updateTable(vt, pt, scopeName, kind, level + 1);
+        }
+        if (_else != null) {
+            _else.updateTable(vt, pt, scopeName, kind, level + 1);
+        }
+    }
 }

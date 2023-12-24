@@ -1,5 +1,7 @@
 package io.github.riicarus.common.data.ast.generic.type;
 
+import io.github.riicarus.common.data.table.type.FuncType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,5 +68,14 @@ public class FuncTypeNode extends TypeNode {
 
     public void addArgType(TypeNode typeNode) {
         argTypeList.add(0, typeNode);
+    }
+
+    @Override
+    public FuncType getVarType() {
+        FuncType funcType = new FuncType();
+
+        funcType.setReturnType(returnType.getVarType());
+        argTypeList.forEach(n -> funcType.addArgType(n.getVarType()));
+        return funcType;
     }
 }
