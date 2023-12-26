@@ -11,14 +11,8 @@ import io.github.riicarus.common.data.table.type.FloatType;
  */
 public class FloatTypeNode extends TypeNode {
 
-    private static final FloatTypeNode INSTANCE = new FloatTypeNode();
-
-    protected FloatTypeNode() {
+    public FloatTypeNode() {
         super("FLOAT");
-    }
-
-    public static FloatTypeNode getInstance() {
-        return INSTANCE;
     }
 
     @Override

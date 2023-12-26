@@ -11,14 +11,8 @@ import io.github.riicarus.common.data.table.type.VoidType;
  */
 public class VoidTypeNode extends TypeNode {
 
-    private static final VoidTypeNode INSTANCE = new VoidTypeNode();
-
-    protected VoidTypeNode() {
+    public VoidTypeNode() {
         super("VOID");
-    }
-
-    public static VoidTypeNode getInstance() {
-        return INSTANCE;
     }
 
     @Override

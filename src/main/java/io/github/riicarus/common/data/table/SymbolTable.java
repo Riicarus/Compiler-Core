@@ -26,16 +26,16 @@ public class SymbolTable {
         curScope = curScope.addScope(scopeName);
     }
 
-    public void enterScope(String scopeName) {
+    public void enterScope(String fullScopeName) {
         if (!readOnly) {
             throw new IllegalStateException("Syntax error: can not enter scope before ast scope scan finished.");
         }
 
-        Scope nextScope = curScope.getScope(scopeName);
+        Scope nextScope = curScope.getScope(fullScopeName);
         if (nextScope == null) {
-            throw new IllegalStateException("Syntax error: can not enter scope: " + scopeName);
+            throw new IllegalStateException("Syntax error: can not enter scope: " + fullScopeName);
         }
-        curScope = curScope.getScope(scopeName);
+        curScope = nextScope;
     }
 
     public void exitScope() {

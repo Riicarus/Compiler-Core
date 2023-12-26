@@ -11,14 +11,8 @@ import io.github.riicarus.common.data.table.type.StringType;
  */
 public class StringTypeNode extends TypeNode {
 
-    private static final StringTypeNode INSTANCE = new StringTypeNode();
-
-    protected StringTypeNode() {
+    public StringTypeNode() {
         super("STRING");
-    }
-
-    public static StringTypeNode getInstance() {
-        return INSTANCE;
     }
 
     @Override

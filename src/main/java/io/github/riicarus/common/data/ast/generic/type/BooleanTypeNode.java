@@ -11,14 +11,8 @@ import io.github.riicarus.common.data.table.type.BooleanType;
  */
 public class BooleanTypeNode extends TypeNode {
 
-    private static final BooleanTypeNode INSTANCE = new BooleanTypeNode();
-
-    protected BooleanTypeNode() {
+    public BooleanTypeNode() {
         super("BOOLEAN");
-    }
-
-    public static BooleanTypeNode getInstance() {
-        return INSTANCE;
     }
 
     @Override

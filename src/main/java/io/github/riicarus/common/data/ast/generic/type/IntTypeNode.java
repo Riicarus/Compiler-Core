@@ -11,14 +11,8 @@ import io.github.riicarus.common.data.table.type.IntType;
  */
 public class IntTypeNode extends TypeNode {
 
-    private static final IntTypeNode INSTANCE = new IntTypeNode();
-
-    protected IntTypeNode() {
+    public IntTypeNode() {
         super("INT");
-    }
-
-    public static IntTypeNode getInstance() {
-        return INSTANCE;
     }
 
     @Override

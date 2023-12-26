@@ -80,7 +80,7 @@ public class Scope {
     public Scope addScope(String scopeName) {
         Scope scope = new Scope(scopeName, children.size(), fullName, level + 1, this);
 
-        children.put(scope.getName(), scope);
+        children.put(scope.getFullName(), scope);
         return scope;
     }
 
