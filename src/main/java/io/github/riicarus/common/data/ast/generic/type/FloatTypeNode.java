@@ -14,7 +14,7 @@ public class FloatTypeNode extends TypeNode {
     private static final FloatTypeNode INSTANCE = new FloatTypeNode();
 
     protected FloatTypeNode() {
-        super("Float");
+        super("FLOAT");
     }
 
     public static FloatTypeNode getInstance() {
@@ -32,13 +32,13 @@ public class FloatTypeNode extends TypeNode {
         }
 
         // like: Float
-        sb.append(prefix).append(t).append(link).append(name);
+        sb.append(prefix).append(t).append(link).append(name).append("\t\t").append(getScopeName());
 
         return sb.toString();
     }
 
     @Override
     public FloatType getVarType() {
-        return FloatType.getInstance();
+        return new FloatType();
     }
 }

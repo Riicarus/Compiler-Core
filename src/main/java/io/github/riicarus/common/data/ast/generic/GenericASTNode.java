@@ -1,9 +1,8 @@
 package io.github.riicarus.common.data.ast.generic;
 
 import io.github.riicarus.common.data.ast.ASTNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * 通用型 AST 节点
@@ -15,11 +14,24 @@ import io.github.riicarus.common.data.table.VariableTable;
 public abstract class GenericASTNode extends ASTNode {
 
     protected final String name;
+    protected String scopeName;
 
     public GenericASTNode(String name) {
         this.name = name;
     }
 
-    public abstract void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level);
+    public final void updateTable(SymbolTable table, VarKind varKind) {
+        setScopeName(table.getCurScopeName());
+        doUpdateTable(table, varKind);
+    }
 
+    protected abstract void doUpdateTable(SymbolTable table, VarKind varKind);
+
+    public String getScopeName() {
+        return scopeName;
+    }
+
+    public void setScopeName(String scopeName) {
+        this.scopeName = scopeName;
+    }
 }

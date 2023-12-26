@@ -14,7 +14,7 @@ public class VoidTypeNode extends TypeNode {
     private static final VoidTypeNode INSTANCE = new VoidTypeNode();
 
     protected VoidTypeNode() {
-        super("Void");
+        super("VOID");
     }
 
     public static VoidTypeNode getInstance() {
@@ -32,13 +32,13 @@ public class VoidTypeNode extends TypeNode {
         }
 
         // like: Void
-        sb.append(prefix).append(t).append(link).append(name);
+        sb.append(prefix).append(t).append(link).append(name).append("\t\t").append(getScopeName());
 
         return sb.toString();
     }
 
     @Override
     public VoidType getVarType() {
-        return VoidType.getInstance();
+        return new VoidType();
     }
 }

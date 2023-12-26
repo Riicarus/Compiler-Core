@@ -9,14 +9,8 @@ package io.github.riicarus.common.data.table.type;
  */
 public class StringType extends VarType {
 
-    private static final StringType INSTANCE = new StringType();
-
-    private StringType() {
+    public StringType() {
         super("STRING");
-    }
-
-    public static StringType getInstance() {
-        return INSTANCE;
     }
 
 }

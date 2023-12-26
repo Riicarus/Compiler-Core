@@ -14,7 +14,7 @@ public class StringTypeNode extends TypeNode {
     private static final StringTypeNode INSTANCE = new StringTypeNode();
 
     protected StringTypeNode() {
-        super("String");
+        super("STRING");
     }
 
     public static StringTypeNode getInstance() {
@@ -32,13 +32,13 @@ public class StringTypeNode extends TypeNode {
         }
 
         // like: String
-        sb.append(prefix).append(t).append(link).append(name);
+        sb.append(prefix).append(t).append(link).append(name).append("\t\t").append(getScopeName());
 
         return sb.toString();
     }
 
     @Override
     public StringType getVarType() {
-        return StringType.getInstance();
+        return new StringType();
     }
 }

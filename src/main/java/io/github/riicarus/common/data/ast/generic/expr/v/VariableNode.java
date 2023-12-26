@@ -2,10 +2,8 @@ package io.github.riicarus.common.data.ast.generic.expr.v;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 import io.github.riicarus.common.data.ast.generic.type.TypeNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableInfo;
-import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * <p>变量 AST 节点</p>
@@ -21,7 +19,7 @@ public class VariableNode extends ExprNode {
     protected TypeNode typeNode;
 
     public VariableNode(String varName) {
-        super("Var");
+        super("VAR");
         this.varName = varName;
     }
 
@@ -38,18 +36,18 @@ public class VariableNode extends ExprNode {
         // like: Var (VarName)
         sb.append(prefix).append(t).append(link).append(name)
                 .append("(").append(varName).append(")")
+                .append("\t\t").append(getScopeName())
                 .append(typeNode == null ? "" : typeNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
         if (typeNode != null) {
-            VariableInfo variableInfo = new VariableInfo(varName, scopeName, kind, typeNode.getVarType(), level);
-            vt.addVariable(variableInfo);
+            table.addVariable(varName, varKind, typeNode.getVarType());
 
-            typeNode.updateTable(vt, pt, scopeName, kind, level);
+            typeNode.updateTable(table, varKind);
         }
     }
 

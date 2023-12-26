@@ -9,13 +9,8 @@ package io.github.riicarus.common.data.table.type;
  */
 public class BooleanType extends VarType {
 
-    private static final BooleanType INSTANCE = new BooleanType();
-
-    private BooleanType() {
-        super("BOOL");
+    public BooleanType() {
+        super("BOOLEAN");
     }
 
-    public static BooleanType getInstance() {
-        return INSTANCE;
-    }
 }

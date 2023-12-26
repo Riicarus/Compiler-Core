@@ -1,9 +1,8 @@
 package io.github.riicarus.common.data.ast.generic.code;
 
 import io.github.riicarus.common.data.ast.generic.GenericASTNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * 语句 AST 节点
@@ -20,7 +19,7 @@ public class StatementNode extends GenericASTNode {
     private StatementNode nextStatementNode;
 
     public StatementNode() {
-        super("Statement");
+        super("STATEMENT");
     }
 
     @Override
@@ -34,15 +33,23 @@ public class StatementNode extends GenericASTNode {
         }
 
         sb.append(prefix).append(t).append(link).append(name)
+                .append("\t\t").append(getScopeName())
                 .append(curNode == null ? "" : curNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
         if (curNode != null) {
-            curNode.updateTable(vt, pt, scopeName, kind, level);
+            if (curNode instanceof CodeBlockNode) {
+                table.enterNewScope(null);
+            }
+            curNode.updateTable(table, VarKind.VARIABLE);
+
+            if (curNode instanceof CodeBlockNode) {
+                table.exitScope();
+            }
         }
     }
 

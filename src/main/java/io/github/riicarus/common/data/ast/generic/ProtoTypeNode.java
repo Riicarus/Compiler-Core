@@ -3,12 +3,13 @@ package io.github.riicarus.common.data.ast.generic;
 import io.github.riicarus.common.data.ast.generic.code.CodeBlockNode;
 import io.github.riicarus.common.data.ast.generic.expr.v.VariableNode;
 import io.github.riicarus.common.data.ast.generic.type.TypeNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.ProcedureInfo;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>函数原型 AST 节点</p>
@@ -24,11 +25,11 @@ import java.util.List;
 public class ProtoTypeNode extends GenericASTNode {
 
     protected final List<VariableNode> argNodeList = new ArrayList<>();
-    protected CodeBlockNode body;
-    protected TypeNode returnType;
+    protected CodeBlockNode codeBlockNode;
+    protected TypeNode returnTypeNode;
 
     public ProtoTypeNode() {
-        super("Prototype");
+        super("PROTOTYPE");
     }
 
     @Override
@@ -42,10 +43,11 @@ public class ProtoTypeNode extends GenericASTNode {
         }
 
         // like: Prototype
-        sb.append(prefix).append(t).append(link).append(name);
+        sb.append(prefix).append(t).append(link).append(name)
+                .append(getScopeName());
         argNodeList.forEach(n -> sb.append(n.toTreeString(level + 1, prefix)));
-        sb.append(returnType == null ? "" : returnType.toTreeString(level + 1, prefix))
-                .append(body == null ? "" : body.toTreeString(level + 1, prefix));
+        sb.append(returnTypeNode == null ? "" : returnTypeNode.toTreeString(level + 1, prefix))
+                .append(codeBlockNode == null ? "" : codeBlockNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
@@ -54,30 +56,36 @@ public class ProtoTypeNode extends GenericASTNode {
         return argNodeList;
     }
 
+    public List<ProcedureInfo.ArgEntry> getArgEntryList() {
+        return argNodeList.stream()
+                .map(n -> new ProcedureInfo.ArgEntry(n.getVarName(), n.getTypeNode().getVarType()))
+                .collect(Collectors.toList());
+    }
+
     public void addArgNode(VariableNode argNode) {
         this.argNodeList.add(argNode);
     }
 
-    public CodeBlockNode getBody() {
-        return body;
+    public CodeBlockNode getCodeBlockNode() {
+        return codeBlockNode;
     }
 
-    public void setBody(CodeBlockNode body) {
-        this.body = body;
+    public void setCodeBlockNode(CodeBlockNode codeBlockNode) {
+        this.codeBlockNode = codeBlockNode;
     }
 
-    public TypeNode getReturnType() {
-        return returnType;
+    public TypeNode getReturnTypeNode() {
+        return returnTypeNode;
     }
 
-    public void setReturnType(TypeNode returnType) {
-        this.returnType = returnType;
+    public void setReturnTypeNode(TypeNode returnTypeNode) {
+        this.returnTypeNode = returnTypeNode;
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
-        argNodeList.forEach(n -> n.updateTable(vt, pt, scopeName, VarKind.PARAMETER, level));
-        body.updateTable(vt, pt, scopeName + "#" + CodeBlockNode.genCodeBlockName(name), VarKind.VARIABLE, level);
-        returnType.updateTable(vt, pt, scopeName, kind, level);
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
+        argNodeList.forEach(n -> n.updateTable(table, VarKind.PARAMETER));
+        codeBlockNode.updateTable(table, VarKind.VARIABLE);
+        returnTypeNode.updateTable(table, VarKind.PARAMETER);
     }
 }

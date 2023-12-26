@@ -2,9 +2,8 @@ package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
 import io.github.riicarus.common.data.ast.generic.expr.op.compute.AssignNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,7 @@ public class ForInitNode extends ExprNode {
     private final List<AssignNode> initNodeList = new ArrayList<>();
 
     public ForInitNode() {
-        super("ForInit");
+        super("FOR_INIT");
     }
 
     @Override
@@ -34,15 +33,16 @@ public class ForInitNode extends ExprNode {
             sb.append("\r\n");
         }
 
-        sb.append(prefix).append(t).append(link).append(name);
+        sb.append(prefix).append(t).append(link).append(name)
+                .append("\t\t").append(getScopeName());
         initNodeList.forEach(n -> sb.append(n.toTreeString(level + 1, prefix)));
 
         return sb.toString();
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
-        initNodeList.forEach(n -> n.updateTable(vt, pt, scopeName, kind, level));
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
+        initNodeList.forEach(n -> n.updateTable(table, VarKind.VARIABLE));
     }
 
     public void addInitNode(AssignNode initNode) {

@@ -1,9 +1,8 @@
 package io.github.riicarus.common.data.ast.generic.type;
 
 import io.github.riicarus.common.data.ast.generic.GenericASTNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 import io.github.riicarus.common.data.table.type.VarType;
 
 /**
@@ -21,6 +20,6 @@ public abstract class TypeNode extends GenericASTNode {
     public abstract VarType getVarType();
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
     }
 }

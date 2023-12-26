@@ -14,7 +14,7 @@ public class IntTypeNode extends TypeNode {
     private static final IntTypeNode INSTANCE = new IntTypeNode();
 
     protected IntTypeNode() {
-        super("Int");
+        super("INT");
     }
 
     public static IntTypeNode getInstance() {
@@ -32,13 +32,13 @@ public class IntTypeNode extends TypeNode {
         }
 
         // like: Int
-        sb.append(prefix).append(t).append(link).append(name);
+        sb.append(prefix).append(t).append(link).append(name).append("\t\t").append(getScopeName());
 
         return sb.toString();
     }
 
     @Override
     public IntType getVarType() {
-        return IntType.getInstance();
+        return new IntType();
     }
 }

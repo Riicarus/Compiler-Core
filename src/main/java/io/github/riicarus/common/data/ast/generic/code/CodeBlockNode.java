@@ -1,13 +1,11 @@
 package io.github.riicarus.common.data.ast.generic.code;
 
 import io.github.riicarus.common.data.ast.generic.GenericASTNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 代码块 AST 节点
@@ -18,21 +16,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class CodeBlockNode extends GenericASTNode {
 
-    private static final AtomicInteger CODE_BLOCK_ID_GEN = new AtomicInteger(0);
-
-    public static String genCodeBlockName(String scopeName) {
-        return scopeName + "#CODE_BLOCK_" + CODE_BLOCK_ID_GEN.getAndIncrement();
-    }
-
     protected final List<StatementNode> statementList = new ArrayList<>();
 
     public CodeBlockNode(List<StatementNode> statementList) {
-        super("CodeBlock");
+        super("CODE_BLOCK");
         this.statementList.addAll(statementList);
     }
 
     public CodeBlockNode() {
-        super("CodeBlock");
+        super("CODE_BLOCK");
     }
 
     @Override
@@ -46,15 +38,16 @@ public class CodeBlockNode extends GenericASTNode {
         }
 
         // like: CodeBlock
-        sb.append(prefix).append(t).append(link).append(name);
+        sb.append(prefix).append(t).append(link).append(name)
+                .append("\t\t").append(getScopeName());
         statementList.forEach(n -> sb.append(n.toTreeString(level + 1, prefix)));
 
         return sb.toString();
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
-        statementList.forEach(n -> n.updateTable(vt, pt, scopeName, kind, level + 1));
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
+        statementList.forEach(n -> n.updateTable(table, varKind));
     }
 
     public void addStatement(StatementNode statementNode) {

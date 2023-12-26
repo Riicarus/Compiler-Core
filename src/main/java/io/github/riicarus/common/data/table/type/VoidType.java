@@ -9,13 +9,8 @@ package io.github.riicarus.common.data.table.type;
  */
 public class VoidType extends VarType {
 
-    private static final VoidType INSTANCE = new VoidType();
-
-    private VoidType() {
+    public VoidType() {
         super("VOID");
     }
 
-    public static VoidType getInstance() {
-        return INSTANCE;
-    }
 }

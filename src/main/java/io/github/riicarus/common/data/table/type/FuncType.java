@@ -18,7 +18,7 @@ public class FuncType extends VarType {
     private final List<VarType> argTypeList = new ArrayList<>();
 
     public FuncType() {
-        super("FUNC");
+        super("FUNCTION");
     }
 
     public void addArgType(VarType type) {

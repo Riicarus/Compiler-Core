@@ -1,5 +1,7 @@
 package io.github.riicarus.common.data.ast.generic.type;
 
+import io.github.riicarus.common.data.table.SymbolTable;
+import io.github.riicarus.common.data.table.VarKind;
 import io.github.riicarus.common.data.table.type.FuncType;
 
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ public class FuncTypeNode extends TypeNode {
     private final List<TypeNode> argTypeList = new ArrayList<>();
 
     public FuncTypeNode() {
-        super("Func");
+        super("FUNCTION");
     }
 
     @Override
@@ -33,6 +35,7 @@ public class FuncTypeNode extends TypeNode {
 
         // like: Func
         sb.append(prefix).append(t).append(link).append(name)
+                .append("\t\t").append(getScopeName())
                 .append(returnType.toTreeString(level + 1, prefix));
         argTypeList.forEach(n -> sb.append(n.toTreeString(level + 1, prefix)));
 
@@ -77,5 +80,11 @@ public class FuncTypeNode extends TypeNode {
         funcType.setReturnType(returnType.getVarType());
         argTypeList.forEach(n -> funcType.addArgType(n.getVarType()));
         return funcType;
+    }
+
+    @Override
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
+        returnType.updateTable(table, varKind);
+        argTypeList.forEach(n -> n.updateTable(table, varKind));
     }
 }

@@ -14,7 +14,7 @@ public class BooleanTypeNode extends TypeNode {
     private static final BooleanTypeNode INSTANCE = new BooleanTypeNode();
 
     protected BooleanTypeNode() {
-        super("Boolean");
+        super("BOOLEAN");
     }
 
     public static BooleanTypeNode getInstance() {
@@ -32,13 +32,13 @@ public class BooleanTypeNode extends TypeNode {
         }
 
         // like: Boolean
-        sb.append(prefix).append(t).append(link).append(name);
+        sb.append(prefix).append(t).append(link).append(name).append("\t\t").append(getScopeName());
 
         return sb.toString();
     }
 
     @Override
     public BooleanType getVarType() {
-        return BooleanType.getInstance();
+        return new BooleanType();
     }
 }

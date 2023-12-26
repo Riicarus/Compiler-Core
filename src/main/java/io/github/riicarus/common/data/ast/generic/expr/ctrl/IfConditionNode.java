@@ -1,9 +1,8 @@
 package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * if 条件语句 AST 节点
@@ -17,7 +16,7 @@ public class IfConditionNode extends ExprNode {
     private final ExprNode condition;
 
     public IfConditionNode(ExprNode condition) {
-        super("Condition");
+        super("IF_CONDITION");
         this.condition = condition;
     }
 
@@ -32,16 +31,17 @@ public class IfConditionNode extends ExprNode {
         }
 
         // like: condition
-        sb.append(prefix).append(t).append(link).append(name)
+        sb.append(prefix).append(t).append(link)
+                .append(name).append("\t\t").append(getScopeName())
                 .append(condition == null ? "" : condition.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
         if (condition != null) {
-            condition.updateTable(vt, pt, scopeName, kind, level);
+            condition.updateTable(table, VarKind.VARIABLE);
         }
     }
 }

@@ -9,13 +9,8 @@ package io.github.riicarus.common.data.table.type;
  */
 public class FloatType extends VarType {
 
-    private static final FloatType INSTANCE = new FloatType();
-
-    private FloatType() {
+    public FloatType() {
         super("FLOAT");
     }
 
-    public static FloatType getInstance() {
-        return INSTANCE;
-    }
 }

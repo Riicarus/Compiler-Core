@@ -9,13 +9,9 @@ package io.github.riicarus.common.data.table.type;
  */
 public class IntType extends VarType {
 
-    private static final IntType INSTANCE = new IntType();
 
-    private IntType() {
+    public IntType() {
         super("INT");
     }
 
-    public static IntType getInstance() {
-        return INSTANCE;
-    }
 }

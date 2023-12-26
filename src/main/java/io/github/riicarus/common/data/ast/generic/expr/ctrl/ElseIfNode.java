@@ -2,9 +2,8 @@ package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.code.CodeBlockNode;
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * else if AST 节点
@@ -19,7 +18,7 @@ public class ElseIfNode extends ExprNode {
     private CodeBlockNode codeBlockNode;
 
     public ElseIfNode() {
-        super("ElseIf");
+        super("ELSE_IF");
     }
 
     @Override
@@ -33,6 +32,7 @@ public class ElseIfNode extends ExprNode {
         }
 
         sb.append(prefix).append(t).append(link).append(name)
+                .append("\t\t").append(getScopeName())
                 .append(conditionNode == null ? "" : conditionNode.toTreeString(level + 1, prefix))
                 .append(codeBlockNode == null ? "" : codeBlockNode.toTreeString(level + 1, prefix));
 
@@ -40,14 +40,16 @@ public class ElseIfNode extends ExprNode {
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
         if (conditionNode != null) {
-            conditionNode.updateTable(vt, pt, scopeName, kind, level);
+            conditionNode.updateTable(table, VarKind.VARIABLE);
         }
 
+        table.enterNewScope(name);
         if (codeBlockNode != null) {
-            codeBlockNode.updateTable(vt, pt, scopeName + "#" + CodeBlockNode.genCodeBlockName(name), kind, level);
+            codeBlockNode.updateTable(table, VarKind.VARIABLE);
         }
+        table.exitScope();
     }
 
     public ExprNode getConditionNode() {

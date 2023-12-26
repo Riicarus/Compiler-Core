@@ -1,9 +1,8 @@
 package io.github.riicarus.common.data.ast.generic.expr.op.abstruct;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * 二元运算符 AST 节点
@@ -41,7 +40,7 @@ public abstract class BinaryOpNode extends OpNode {
         }
 
         // like: :=
-        sb.append(prefix).append(t).append(link).append(name)
+        sb.append(prefix).append(t).append(link).append(name).append("\t\t").append(getScopeName())
                 .append(leftOperand == null ? "" : leftOperand.toTreeString(level + 1, prefix))
                 .append(rightOperand == null ? "" : rightOperand.toTreeString(level + 1, prefix));
 
@@ -49,13 +48,13 @@ public abstract class BinaryOpNode extends OpNode {
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
         if (leftOperand != null) {
-            leftOperand.updateTable(vt, pt, scopeName, kind, level);
+            leftOperand.updateTable(table, VarKind.VARIABLE);
         }
 
         if (rightOperand != null) {
-            rightOperand.updateTable(vt, pt, scopeName, kind, level);
+            rightOperand.updateTable(table, VarKind.VARIABLE);
         }
     }
 

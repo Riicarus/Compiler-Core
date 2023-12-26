@@ -3,7 +3,6 @@ package io.github.riicarus.common.data.table;
 import io.github.riicarus.common.data.table.type.VarType;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 变量信息, 用于变量名表
@@ -13,41 +12,38 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0.0
  */
 public final class VariableInfo {
-    private static final AtomicInteger ADDR_GEN = new AtomicInteger(0);
 
     private final String name;
     private final String scopeName;
-    private final VarKind kind;
-    private final VarType type;
+    private final VarKind varKind;
+    private final VarType varType;
     private final int level;
-    private final int addr;
 
-    public VariableInfo(String name, String scopeName, VarKind kind, VarType type, int level) {
+    public VariableInfo(String name, String scopeName, VarKind varKind, VarType varType, int level) {
         this.name = name;
         this.scopeName = scopeName;
-        this.kind = kind;
-        this.type = type;
+        this.varKind = varKind;
+        this.varType = varType;
         this.level = level;
-        this.addr = ADDR_GEN.getAndIncrement();
     }
 
-    public String name() {
+    public String getName() {
         return name;
     }
 
-    public String procedure() {
+    public String getProcedure() {
         return scopeName;
     }
 
-    public VarKind kind() {
-        return kind;
+    public VarKind getVarKind() {
+        return varKind;
     }
 
-    public VarType type() {
-        return type;
+    public VarType getVarType() {
+        return varType;
     }
 
-    public int level() {
+    public int getLevel() {
         return level;
     }
 
@@ -58,14 +54,14 @@ public final class VariableInfo {
         var that = (VariableInfo) obj;
         return Objects.equals(this.name, that.name) &&
                 Objects.equals(this.scopeName, that.scopeName) &&
-                Objects.equals(this.kind, that.kind) &&
-                Objects.equals(this.type, that.type) &&
+                Objects.equals(this.varKind, that.varKind) &&
+                Objects.equals(this.varType, that.varType) &&
                 this.level == that.level;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, scopeName, kind, type, level);
+        return Objects.hash(name, scopeName, varKind, varType, level);
     }
 
     @Override
@@ -73,8 +69,8 @@ public final class VariableInfo {
         return "[" +
                 name + ", " +
                 scopeName + ", " +
-                kind + ", " +
-                type.getName() + ", " +
+                varKind + ", " +
+                varType + ", " +
                 level +
                 "]";
     }

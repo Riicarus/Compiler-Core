@@ -1,9 +1,8 @@
 package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * continue 语句 AST 节点
@@ -15,7 +14,7 @@ import io.github.riicarus.common.data.table.VariableTable;
 public class ContinueNode extends ExprNode {
 
     public ContinueNode() {
-        super("Continue");
+        super("CONTINUE");
     }
 
     @Override
@@ -29,12 +28,13 @@ public class ContinueNode extends ExprNode {
         }
 
         // like: continue
-        sb.append(prefix).append(t).append(link).append(name);
+        sb.append(prefix).append(t).append(link).append(name)
+                .append("\t\t").append(getScopeName());
 
         return sb.toString();
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
     }
 }

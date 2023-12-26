@@ -6,10 +6,8 @@ import io.github.riicarus.common.data.ast.detailed.DetailedASTNode;
 import io.github.riicarus.common.data.ast.detailed.NonterminalASTNode;
 import io.github.riicarus.common.data.ast.detailed.TerminalASTNode;
 import io.github.riicarus.common.data.ast.generic.GenericASTNode;
-import io.github.riicarus.common.data.ast.generic.code.CodeBlockNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 import io.github.riicarus.front.lex.LexicalSymbol;
 import io.github.riicarus.front.syntax.SyntaxDefiner;
 import io.github.riicarus.front.syntax.SyntaxProduction;
@@ -148,11 +146,10 @@ public class LL1Syntaxer implements Syntaxer {
             throw new IllegalStateException("LL1Syntax error: ast stack should only have one non-terminal ast node, but get: " + astStack);
         }
 
-        VariableTable vt = new VariableTable();
-        ProcedureTable pt = new ProcedureTable();
-        node.updateTable(vt, pt, CodeBlockNode.genCodeBlockName("#Main"), VarKind.VARIABLE, 0);
+        SymbolTable table = new SymbolTable();
+        node.updateTable(table, VarKind.VARIABLE);
         System.out.println("LL1Syntax parse succeeded, time used: " + (System.currentTimeMillis() - time) + " ms.");
-        return new SyntaxParseResult(node, vt, pt);
+        return new SyntaxParseResult(node, table);
     }
 
     private void reset(List<Token> tokenList, Set<LexicalSymbol> assistSet) {

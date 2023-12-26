@@ -1,9 +1,8 @@
 package io.github.riicarus.common.data.ast.generic.expr.ctrl;
 
 import io.github.riicarus.common.data.ast.generic.expr.ExprNode;
-import io.github.riicarus.common.data.table.ProcedureTable;
+import io.github.riicarus.common.data.table.SymbolTable;
 import io.github.riicarus.common.data.table.VarKind;
-import io.github.riicarus.common.data.table.VariableTable;
 
 /**
  * if AST 节点
@@ -19,7 +18,7 @@ public class IfNode extends ExprNode {
     private final ElseNode _else;
 
     public IfNode(IfConditionNode condition, ThenNode then, ElseNode _else) {
-        super("If");
+        super("IF");
         this.condition = condition;
         this.then = then;
         this._else = _else;
@@ -37,6 +36,7 @@ public class IfNode extends ExprNode {
 
         // like: if
         sb.append(prefix).append(t).append(link).append(name)
+                .append("\t\t").append(getScopeName())
                 .append(condition == null ? "" : condition.toTreeString(level + 1, prefix))
                 .append(then == null ? "" : then.toTreeString(level + 1, prefix))
                 .append(_else == null ? "" : _else.toTreeString(level + 1, prefix));
@@ -45,16 +45,15 @@ public class IfNode extends ExprNode {
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
-        // if 主干语句本身不增加层数, 只有其中的 codeBlock 增加层数.
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
         if (condition != null) {
-            condition.updateTable(vt, pt, scopeName, kind, level);
+            condition.updateTable(table, VarKind.VARIABLE);
         }
         if (then != null) {
-            then.updateTable(vt, pt, scopeName, kind, level + 1);
+            then.updateTable(table, VarKind.VARIABLE);
         }
         if (_else != null) {
-            _else.updateTable(vt, pt, scopeName, kind, level + 1);
+            _else.updateTable(table, VarKind.VARIABLE);
         }
     }
 }

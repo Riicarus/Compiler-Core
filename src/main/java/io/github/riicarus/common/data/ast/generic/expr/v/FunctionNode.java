@@ -1,14 +1,12 @@
-package io.github.riicarus.common.data.ast.generic.expr.func;
+package io.github.riicarus.common.data.ast.generic.expr.v;
 
 import io.github.riicarus.common.data.ast.generic.ProtoTypeNode;
-import io.github.riicarus.common.data.ast.generic.code.CodeBlockNode;
-import io.github.riicarus.common.data.ast.generic.expr.v.VariableNode;
 import io.github.riicarus.common.data.ast.generic.type.TypeNode;
-import io.github.riicarus.common.data.table.*;
+import io.github.riicarus.common.data.table.SymbolTable;
+import io.github.riicarus.common.data.table.VarKind;
 import io.github.riicarus.common.data.table.type.FuncType;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * 函数 AST 节点
@@ -48,29 +46,29 @@ public class FunctionNode extends VariableNode {
         // like: Var (VarName)
         sb.append(prefix).append(t).append(link).append(name)
                 .append("(").append(varName).append(")")
+                .append("\t\t").append(getScopeName())
                 .append(protoTypeNode == null ? "" : protoTypeNode.toTreeString(level + 1, prefix));
 
         return sb.toString();
     }
 
     @Override
-    public void updateTable(VariableTable vt, ProcedureTable pt, String scopeName, VarKind kind, int level) {
+    public void doUpdateTable(SymbolTable table, VarKind varKind) {
         if (protoTypeNode != null) {
             FuncType funcType = new FuncType();
-            funcType.setReturnType(protoTypeNode.getReturnType().getVarType());
+            funcType.setReturnType(protoTypeNode.getReturnTypeNode().getVarType());
             protoTypeNode.getArgNodeList().forEach(n -> funcType.addArgType(n.getTypeNode().getVarType()));
-            VariableInfo variableInfo = new VariableInfo(varName, scopeName, kind,
-                    funcType, level);
-            vt.addVariable(variableInfo);
 
-            ProcedureInfo procedureInfo = new ProcedureInfo(varName,
-                    protoTypeNode.getReturnType().getVarType(), level,
-                    protoTypeNode.getArgNodeList().stream()
-                            .map(n -> new ProcedureInfo.ArgEntry(n.getVarName(), n.getTypeNode().getVarType()))
-                            .collect(Collectors.toList()));
-            pt.addProcedure(procedureInfo);
+            table.addVariable(varName, varKind, funcType);
+            table.addProcedure(
+                    varName,
+                    protoTypeNode.getReturnTypeNode().getVarType(),
+                    protoTypeNode.getArgEntryList()
+            );
 
-            protoTypeNode.updateTable(vt, pt, scopeName + "#" + CodeBlockNode.genCodeBlockName(varName), VarKind.VARIABLE, level);
+            table.enterNewScope(varName);
+            protoTypeNode.updateTable(table, VarKind.VARIABLE);
+            table.exitScope();
         }
     }
 
@@ -84,7 +82,7 @@ public class FunctionNode extends VariableNode {
 
     public void setReturnType(TypeNode typeNode) {
         if (protoTypeNode != null) {
-            protoTypeNode.setReturnType(typeNode);
+            protoTypeNode.setReturnTypeNode(typeNode);
         }
     }
 }
